@@ -1,0 +1,29 @@
+﻿** Highlights
+     Tables that will be rebuilt
+       None
+     Clustered indexes that will be dropped
+       None
+     Clustered indexes that will be created
+       None
+     Possible data issues
+       None
+
+** User actions
+     Create
+       [dbo].[sp_ssis_addlogentry] (Procedure)
+       [track].[Insert_ApplicationLogBegin] (Procedure)
+       [track].[Insert_ApplicationLogEnd] (Procedure)
+       [track].[Insert_ApplicationLogError] (Procedure)
+       [track].[Insert_BatchLogBegin] (Procedure)
+       [track].[Insert_BatchLogEnd] (Procedure)
+       [track].[Insert_ProcedureLogBegin] (Procedure)
+       [track].[Insert_ProcedureLogEnd] (Procedure)
+       [track].[Insert_ProcedureLogError] (Procedure)
+       [track].[Insert_ProcedureLogIntermediate] (Procedure)
+       [track].[Insert_ProcedureLogOrphan] (Procedure)
+       [verf].[InsertItemCount] (Procedure)
+       [track].[ExampleProcedure] (Procedure)
+       [track].[Insert_ApplicationLogOrphan] (Procedure)
+       [dbo].[sp_ssis_addlogentry].[MS_Description] (Extended Property)
+
+** Supporting actions

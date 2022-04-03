@@ -1,0 +1,3768 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DataSchemaModel FileFormatVersion="1.2" SchemaVersion="2.9" DspName="Microsoft.Data.Tools.Schema.Sql.Sql150DatabaseSchemaProvider" CollationLcid="1033" CollationCaseSensitive="False" xmlns="http://schemas.microsoft.com/sqlserver/dac/Serialization/2012/02">
+	<Header>
+		<CustomData Category="AnsiNulls">
+			<Metadata Name="AnsiNulls" Value="True" />
+		</CustomData>
+		<CustomData Category="QuotedIdentifier">
+			<Metadata Name="QuotedIdentifier" Value="True" />
+		</CustomData>
+		<CustomData Category="CompatibilityMode">
+			<Metadata Name="CompatibilityMode" Value="150" />
+		</CustomData>
+		<CustomData Category="Reference" Type="SqlSchema">
+			<Metadata Name="FileName" Value="C:\PROGRAM FILES\MICROSOFT VISUAL STUDIO\2022\COMMUNITY\COMMON7\IDE\EXTENSIONS\MICROSOFT\SQLDB\EXTENSIONS\SQLSERVER\150\SQLSCHEMAS\MASTER.DACPAC" />
+			<Metadata Name="LogicalName" Value="master.dacpac" />
+			<Metadata Name="ExternalParts" Value="[master]" />
+			<Metadata Name="SuppressMissingDependenciesErrors" Value="False" />
+		</CustomData>
+		<CustomData Category="Reference" Type="Assembly">
+			<Metadata Name="LogicalName" Value="Rogge.Smash.Dbs.dll" />
+			<Metadata Name="FileName" Value="D:\PROJECTS GITHUB\SMASH\ROGGE.SMASH.DBS\OBJ\DEBUG\ROGGE.SMASH.DBS.DLL" />
+			<Metadata Name="AssemblyName" Value="Rogge.Smash.Dbs" />
+			<Metadata Name="PermissionSet" Value="SAFE" />
+			<Metadata Name="Owner" Value="" />
+			<Metadata Name="GenerateSqlClrDdl" Value="True" />
+			<Metadata Name="IsVisible" Value="True" />
+			<Metadata Name="IsModelAware" Value="True" />
+			<Metadata Name="SkipCreationIfEmpty" Value="True" />
+			<Metadata Name="AssemblySymbolsName" Value="D:\Projects GitHub\Smash\Rogge.Smash.Dbs\obj\Debug\Rogge.Smash.Dbs.pdb" />
+		</CustomData>
+		<CustomData Category="SqlCmdVariables" Type="SqlCmdVariable" />
+	</Header>
+	<Model>
+		<Element Type="SqlDatabaseOptions">
+			<Property Name="Collation" Value="SQL_Latin1_General_CP1_CI_AS" />
+			<Property Name="IsAnsiNullDefaultOn" Value="True" />
+			<Property Name="IsAnsiNullsOn" Value="True" />
+			<Property Name="IsAnsiWarningsOn" Value="True" />
+			<Property Name="IsArithAbortOn" Value="True" />
+			<Property Name="IsConcatNullYieldsNullOn" Value="True" />
+			<Property Name="IsTornPageProtectionOn" Value="False" />
+			<Property Name="RecoveryMode" Value="1" />
+			<Property Name="IsFullTextEnabled" Value="True" />
+			<Property Name="PageVerifyMode" Value="3" />
+			<Property Name="IsAllowSnapshotIsolation" Value="True" />
+			<Property Name="IsReadCommittedSnapshot" Value="True" />
+			<Property Name="DefaultLanguage" Value="" />
+			<Property Name="DefaultFullTextLanguage" Value="" />
+			<Property Name="QueryStoreStaleQueryThreshold" Value="367" />
+			<Relationship Name="DefaultFilegroup">
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[PRIMARY]" />
+				</Entry>
+			</Relationship>
+		</Element>
+		<Element Type="SqlSchema" Name="[smash]">
+			<Relationship Name="Authorizer">
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[dbo]" />
+				</Entry>
+			</Relationship>
+		</Element>
+		<Element Type="SqlView" Name="[smash].[DatabaseIndexes]">
+			<Property Name="IsMetadataReported" Value="True" />
+			<Property Name="QueryScript">
+				<Value><![CDATA[
+SELECT
+		[instance_id]				= CHECKSUM(@@SERVERNAME),
+		[database_id]				= DB_ID(),
+	[s].[schema_id],
+	[o].[object_id],
+	[i].[index_id],
+
+	---------------------------------------------------------------------------------
+	---------------------------------------------------------------------------------
+
+		[Instance]					= @@SERVERNAME,
+		[InstanceHost]				= CAST(SERVERPROPERTY('MachineName') AS VARCHAR),
+		[InstanceName]				= @@SERVICENAME,
+
+		[DatabaseType]				= [smash].[SystemDatabaseType](DB_ID()),
+		[ObjectGroup]				= [smash].[ObjectGroup]([o].[type]),
+		[ObjectType]				= [smash].[ObjectType]([o].[type]),
+
+		[DatabaseName]				= DB_NAME(),
+		[SchemaName]				= [s].[name],
+		[ObjectName]				= [o].[name],
+		[IndexName]					= COALESCE([i].[name], N'Heap'),
+
+		[IndexType]					= CASE [i].[type]
+										WHEN 0	THEN 'Heap'
+										WHEN 1	THEN 'Rowstore'
+										WHEN 2	THEN 'Rowstore'
+										WHEN 3	THEN 'XML'
+										WHEN 4	THEN 'Spatial'
+										WHEN 5	THEN 'Columnstore'
+										WHEN 6	THEN 'Columnstore'
+										WHEN 7	THEN 'Hash'
+										END,
+
+		[IndexTypeClustering]		= CASE [i].[type]
+										WHEN 0	THEN 'Heap'
+										WHEN 1	THEN 'Clustered'
+										WHEN 2	THEN 'Nonclustered'
+										WHEN 3	THEN 'XML'
+										WHEN 4	THEN 'Spatial'
+										WHEN 5	THEN 'Clustered'
+										WHEN 6	THEN 'Nonclustered'
+										WHEN 7	THEN 'Nonclustered'
+										END,
+
+		[IsPrimaryKey]				= CASE [i].[is_primary_key]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[IsUnique]					= CASE [i].[is_unique]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[IsUniqueConstraint]		= CASE [i].[is_unique_constraint]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[IsSingleColumn]			= CASE WHEN ((SELECT COUNT(*) FROM sys.index_columns [x] WHERE ([x].[object_id] = [i].[object_id]) AND ([x].[index_id] = [i].[index_id])) = 1)
+										THEN 'Yes'
+										ELSE 'No'
+										END,
+
+		[ColumnsKey]				= STUFF((
+										SELECT
+											N', ' + [z].[name] + IIF(([y].[is_descending_key] = 0), N' ASC', N' DESC')
+										FROM
+											sys.index_columns					[y]
+										INNER JOIN
+											sys.columns							[z]
+												ON	([y].[object_id]		=	[z].[object_id])
+												AND	([y].[column_id]		=	[z].[column_id])
+										WHERE
+												([y].[is_included_column]	=	0)
+											AND	([y].[object_id]			=	[i].[object_id])
+											AND	([y].[index_id]				=	[i].[index_id])
+										ORDER BY
+											[y].[key_ordinal]	ASC
+										FOR XML PATH(N'')), 1, 2, N''),
+
+		[ColumnsKeyAll]				= STUFF((
+										SELECT
+											N', ' + [z].[name]
+										FROM
+											sys.index_columns					[y]
+										INNER JOIN
+											sys.columns							[z]
+												ON	([y].[object_id]		=	[z].[object_id])
+												AND	([y].[column_id]		=	[z].[column_id])
+										WHERE
+												([y].[is_included_column]	=	0)
+											AND	([y].[object_id]			=	[i].[object_id])
+											AND	([y].[index_id]				=	[i].[index_id])
+										ORDER BY
+											[z].[name]	ASC
+										FOR XML PATH(N'')), 1, 2, N''),
+
+		[ColumnsIncluded]			= STUFF((
+										SELECT
+											N', ' + [z].[name]
+										FROM
+											sys.index_columns					[y]
+										INNER JOIN
+											sys.columns							[z]
+												ON	([y].[object_id]		=	[z].[object_id])
+												AND	([y].[column_id]		=	[z].[column_id])
+										WHERE
+												([y].[is_included_column]	=	1)
+											AND	([y].[object_id]			=	[i].[object_id])
+											AND	([y].[index_id]				=	[i].[index_id])
+										ORDER BY
+											[y].[key_ordinal]	ASC
+										FOR XML PATH(N'')), 1, 2, N''),
+
+		[ColumnsAll]				= STUFF((
+										SELECT
+											N', ' + [z].[name]
+										FROM
+											sys.index_columns					[y]
+										INNER JOIN
+											sys.columns							[z]
+												ON	([y].[object_id]		=	[z].[object_id])
+												AND	([y].[column_id]		=	[z].[column_id])
+										WHERE
+												([y].[object_id]			=	[i].[object_id])
+											AND	([y].[index_id]				=	[i].[index_id])
+										ORDER BY
+											[z].[name]	ASC
+										FOR XML PATH(N'')), 1, 2, N''),
+
+		[FileGroup]					= [d].[name],
+
+		[FileGroupDescription]		= CASE [d].[type]
+										WHEN 'FG'	THEN 'Filegroup'
+										WHEN 'FD'	THEN 'Filestream'
+										WHEN 'FX'	THEN 'Memory-optimized'
+										WHEN 'PS'	THEN 'Partition scheme'
+										END,
+
+		[FileGroupIsDefault]		= CASE [d].[is_default]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[FileGroupIsSystem]			= CASE [d].[is_system]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[IgnoreDuplicateKey]		= CASE [i].[ignore_dup_key]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[FillFactor]				= [i].[fill_factor],
+
+		[IsPadded]					= CASE [i].[is_padded]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[IsEnabled]					= CASE [i].[is_disabled]
+										WHEN 0	THEN 'Yes'		--	Enabled
+										WHEN 1	THEN 'No'		--	Disabled
+										END,
+
+		[IsDisabled]				= CASE [i].[is_disabled]
+										WHEN 0	THEN 'No'		--	Enabled
+										WHEN 1	THEN 'Yes'		--	Disabled
+										END,
+
+		[IsHypothetical]			= CASE [i].[is_hypothetical]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[IsIgnoredInOptimization]	= CASE [i].[is_ignored_in_optimization]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[AllowRowLocks]				= CASE [i].[allow_row_locks]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[AllowPageLocks]			= CASE [i].[allow_page_locks]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[IsFiltered]				= CASE [i].[has_filter]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[FilterDefinition]			= [i].[filter_definition],
+
+		[CompressionDelayMinutes]	= [i].[compression_delay],
+
+		[SuppressDupKeyMessages]	= CASE [i].[suppress_dup_key_messages]
+										WHEN 0	THEN 'No'		--	Show
+										WHEN 1	THEN 'Yes'		--	Hide (Suppress)
+										END,
+
+		[IsAutoCreated]				= CASE [i].[auto_created]
+										WHEN 0	THEN 'No'		--	User
+										WHEN 1	THEN 'Yes'		--	Auto
+										END,
+
+		[OptimizeForSequentialKey]	= CONVERT(VARCHAR(3), NULL),
+		--[OptimizeForSequentialKey]	= CASE [i].[optimize_for_sequential_key]
+		--								WHEN 0	THEN 'No'		--	Disabled
+		--								WHEN 1	THEN 'Yes'		--	Enabled
+		--								END,
+		
+	---------------------------------------------------------------------------------
+	---------------------------------------------------------------------------------
+
+		[IsIndexDropCandidate]		= CASE WHEN ([u].[index_id] IS NOT NULL)
+										THEN
+											CASE WHEN
+													([i].[is_primary_key]	= 0)
+												AND	([i].[is_unique ]		= 0)
+												AND	([u].[user_updates]		> 0)
+												AND	([u].[user_seeks]		= 0)
+												AND	([u].[user_scans]		= 0)
+												AND	([u].[user_lookups]		= 0)
+											THEN 'Yes'
+											ELSE 'No'
+											END
+										ELSE NULL
+										END,
+
+		[IsIndexReadByUser]			= CASE WHEN ([u].[index_id] IS NOT NULL)
+										THEN
+											CASE WHEN
+													([u].[user_seeks]		= 0)
+												AND	([u].[user_scans]		= 0)
+												AND	([u].[user_lookups]		= 0)
+											THEN 'No'
+											ELSE 'Yes'
+											END
+										ELSE NULL
+										END,
+
+		[IsIndexReadBySystem]		= CASE WHEN ([u].[index_id] IS NOT NULL)
+										THEN
+											CASE WHEN
+													([u].[system_seeks]		= 0)
+												AND	([u].[system_scans]		= 0)
+												AND	([u].[system_lookups]	= 0)
+											THEN 'No'
+											ELSE 'Yes'
+											END
+										ELSE NULL
+										END,
+
+		[UserSeeks]					= [u].[user_seeks],
+		[UserScans]					= [u].[user_scans],
+		[UserLookups]				= [u].[user_lookups],
+		[UserUpdates]				= [u].[user_updates],
+
+		[LastUserSeek]				= [u].[last_user_seek],
+		[LastUserScan]				= [u].[last_user_scan],
+		[LastUserLookup]			= [u].[last_user_lookup],
+		[LastUserUpdate]			= [u].[last_user_update],
+
+		[LastUserRead]				= (SELECT MAX([x].[v]) FROM (VALUES ([u].[last_user_seek]), ([u].[last_user_scan]), ([u].[last_user_lookup])) [x]([v])),
+
+		[SystemSeeks]				= [u].[system_seeks],
+		[SystemScans]				= [u].[system_scans],
+		[SystemLookups]				= [u].[system_lookups],
+		[SystemUpdates]				= [u].[system_updates],
+
+		[LastSystemSeek]			= [u].[last_system_seek],
+		[LastSystemScan]			= [u].[last_system_scan],
+		[LastSystemLookup]			= [u].[last_system_lookup],
+		[LastSystemUpdate]			= [u].[last_system_update],
+
+		[LastSystemRead]			= (SELECT MAX([x].[v]) FROM (VALUES ([u].[last_system_seek]), ([u].[last_system_scan]), ([u].[last_system_lookup])) [x]([v]))
+
+FROM
+	sys.schemas							[s]
+INNER JOIN
+	sys.objects							[o]
+		ON	([s].[schema_id]		=	[o].[schema_id])
+		AND	([o].[is_ms_shipped]	=	0)
+INNER JOIN
+	sys.indexes							[i]
+		ON	([o].[object_id]		=	[i].[object_id])
+INNER JOIN
+	sys.data_spaces 					[d]
+		ON	([i].[data_space_id]	=	[d].[data_space_id])
+LEFT OUTER JOIN
+	sys.dm_db_index_usage_stats			[u]
+		ON	([i].[object_id]		=	[u].[object_id])
+		AND	([i].[index_id]			=	[u].[index_id])
+		AND	([u].[database_id]		=	DB_ID())]]></Value>
+			</Property>
+			<Property Name="IsAnsiNullsOn" Value="True" />
+			<Relationship Name="Columns">
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[instance_id]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[database_id]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[schema_id]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[schemas].[schema_id]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[object_id]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects].[object_id]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[index_id]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[index_id]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[Instance]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[InstanceHost]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[InstanceName]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[DatabaseType]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[SystemDatabaseType]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[ObjectGroup]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[ObjectGroup]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[ObjectType]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[ObjectType]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[DatabaseName]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[SchemaName]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[schemas].[name]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[ObjectName]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects].[name]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[IndexName]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[IndexType]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[IndexTypeClustering]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[IsPrimaryKey]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[IsUnique]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[IsUniqueConstraint]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[IsSingleColumn]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[ColumnsKey]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[ColumnsKeyAll]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[ColumnsIncluded]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[ColumnsAll]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[FileGroup]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[data_spaces].[name]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[FileGroupDescription]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[FileGroupIsDefault]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[FileGroupIsSystem]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[IgnoreDuplicateKey]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[FillFactor]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[fill_factor]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[IsPadded]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[IsEnabled]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[IsDisabled]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[IsHypothetical]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[IsIgnoredInOptimization]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[AllowRowLocks]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[AllowPageLocks]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[IsFiltered]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[FilterDefinition]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[filter_definition]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[CompressionDelayMinutes]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[compression_delay]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[SuppressDupKeyMessages]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[IsAutoCreated]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[OptimizeForSequentialKey]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[IsIndexDropCandidate]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[IsIndexReadByUser]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[IsIndexReadBySystem]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[UserSeeks]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[user_seeks]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[UserScans]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[user_scans]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[UserLookups]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[user_lookups]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[UserUpdates]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[user_updates]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[LastUserSeek]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[last_user_seek]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[LastUserScan]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[last_user_scan]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[LastUserLookup]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[last_user_lookup]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[LastUserUpdate]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[last_user_update]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[LastUserRead]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[SystemSeeks]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[system_seeks]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[SystemScans]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[system_scans]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[SystemLookups]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[system_lookups]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[SystemUpdates]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[system_updates]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[LastSystemSeek]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[last_system_seek]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[LastSystemScan]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[last_system_scan]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[LastSystemLookup]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[last_system_lookup]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[LastSystemUpdate]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[last_system_update]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexes].[LastSystemRead]" />
+				</Entry>
+			</Relationship>
+			<Relationship Name="QueryDependencies">
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[schemas]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[schemas].[schema_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects].[schema_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects].[is_ms_shipped]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[data_spaces]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[data_space_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[data_spaces].[data_space_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[index_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[index_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[database_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[schemas].[schema_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[varchar]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[SystemDatabaseType]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects].[type]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[ObjectGroup]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[ObjectType]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[schemas].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[type]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[is_primary_key]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[is_unique]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[is_unique_constraint]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns].[index_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[index_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[columns]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[columns].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns].[column_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[columns].[column_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[columns].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns].[is_descending_key]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns].[is_included_column]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns].[index_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[index_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns].[key_ordinal]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[data_spaces].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[data_spaces].[type]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[data_spaces].[is_default]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[data_spaces].[is_system]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[ignore_dup_key]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[fill_factor]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[is_padded]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[is_disabled]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[is_hypothetical]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[is_ignored_in_optimization]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[allow_row_locks]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[allow_page_locks]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[has_filter]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[filter_definition]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[compression_delay]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[suppress_dup_key_messages]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[auto_created]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[is_unique]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[user_updates]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[user_seeks]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[user_scans]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[user_lookups]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[system_seeks]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[system_scans]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[system_lookups]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[user_seeks]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[user_scans]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[user_lookups]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[user_updates]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[last_user_seek]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[last_user_scan]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[last_user_lookup]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[last_user_update]" />
+				</Entry>
+				<Entry />
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[system_seeks]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[system_scans]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[system_lookups]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[system_updates]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[last_system_seek]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[last_system_scan]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[last_system_lookup]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_usage_stats].[last_system_update]" />
+				</Entry>
+			</Relationship>
+			<Relationship Name="Schema">
+				<Entry>
+					<References Name="[smash]" />
+				</Entry>
+			</Relationship>
+			<Annotation Type="SysCommentsObjectAnnotation">
+				<Property Name="Length" Value="9544" />
+				<Property Name="StartLine" Value="1" />
+				<Property Name="StartColumn" Value="1" />
+				<Property Name="HeaderContents" Value="CREATE VIEW [smash].[DatabaseIndexes]&#xD;&#xA;WITH VIEW_METADATA&#xD;&#xA;AS" />
+				<Property Name="FooterContents" Value=";" />
+			</Annotation>
+		</Element>
+		<Element Type="SqlView" Name="[smash].[DatabaseIndexesAllocation]">
+			<Property Name="IsMetadataReported" Value="True" />
+			<Property Name="QueryScript">
+				<Value><![CDATA[
+SELECT
+		[instance_id]				= CHECKSUM(@@SERVERNAME),
+		[database_id]				= DB_ID(),
+	[s].[schema_id],
+	[o].[object_id],
+	[i].[index_id],
+
+	[p].[partition_id],
+	[p].[partition_number],
+	[p].[hobt_id],
+	[a].[allocation_unit_id],
+	[a].[container_id],
+
+	---------------------------------------------------------------------------------
+	---------------------------------------------------------------------------------
+
+		[Instance]					= @@SERVERNAME,
+		[InstanceHost]				= CAST(SERVERPROPERTY('MachineName') AS VARCHAR),
+		[InstanceName]				= @@SERVICENAME,
+
+		[DatabaseType]				= [smash].[SystemDatabaseType](DB_ID()),
+		[ObjectGroup]				= [smash].[ObjectGroup]([o].[type]),
+		[ObjectType]				= [smash].[ObjectType]([o].[type]),
+
+		[DatabaseName]				= DB_NAME(),
+		[SchemaName]				= [s].[name],
+		[ObjectName]				= [o].[name],
+		[IndexName]					= COALESCE([i].[name], N'Heap'),
+
+		[IndexType]					= CASE [i].[type]
+										WHEN 0	THEN 'Heap'
+										WHEN 1	THEN 'Rowstore'
+										WHEN 2	THEN 'Rowstore'
+										WHEN 3	THEN 'XML'
+										WHEN 4	THEN 'Spatial'
+										WHEN 5	THEN 'Columnstore'
+										WHEN 6	THEN 'Columnstore'
+										WHEN 7	THEN 'Hash'
+										END,
+
+		[IndexTypeClustering]		= CASE [i].[type]
+										WHEN 0	THEN 'Heap'
+										WHEN 1	THEN 'Clustered'
+										WHEN 2	THEN 'Nonclustered'
+										WHEN 3	THEN 'XML'
+										WHEN 4	THEN 'Spatial'
+										WHEN 5	THEN 'Clustered'
+										WHEN 6	THEN 'Nonclustered'
+										WHEN 7	THEN 'Nonclustered'
+										END,
+
+		[IsPrimaryKey]				= CASE [i].[is_primary_key]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[IsUnique]					= CASE [i].[is_unique]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[IsUniqueConstraint]		= CASE [i].[is_unique_constraint]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[IsSingleColumn]			= CASE WHEN ((SELECT COUNT(*) FROM sys.index_columns [x] WHERE ([x].[object_id] = [i].[object_id]) AND ([x].[index_id] = [i].[index_id])) = 1)
+										THEN 'Yes'
+										ELSE 'No'
+										END,
+
+		[ColumnsKey]				= STUFF((
+										SELECT
+											N', ' + [z].[name] + IIF(([y].[is_descending_key] = 0), N' ASC', N' DESC')
+										FROM
+											sys.index_columns					[y]
+										INNER JOIN
+											sys.columns							[z]
+												ON	([y].[object_id]		=	[z].[object_id])
+												AND	([y].[column_id]		=	[z].[column_id])
+										WHERE
+												([y].[is_included_column]	=	0)
+											AND	([y].[object_id]			=	[i].[object_id])
+											AND	([y].[index_id]				=	[i].[index_id])
+										ORDER BY
+											[y].[key_ordinal]	ASC
+										FOR XML PATH(N'')), 1, 2, N''),
+
+		[ColumnsKeyAll]				= STUFF((
+										SELECT
+											N', ' + [z].[name]
+										FROM
+											sys.index_columns					[y]
+										INNER JOIN
+											sys.columns							[z]
+												ON	([y].[object_id]		=	[z].[object_id])
+												AND	([y].[column_id]		=	[z].[column_id])
+										WHERE
+												([y].[is_included_column]	=	0)
+											AND	([y].[object_id]			=	[i].[object_id])
+											AND	([y].[index_id]				=	[i].[index_id])
+										ORDER BY
+											[z].[name]	ASC
+										FOR XML PATH(N'')), 1, 2, N''),
+
+		[ColumnsIncluded]			= STUFF((
+										SELECT
+											N', ' + [z].[name]
+										FROM
+											sys.index_columns					[y]
+										INNER JOIN
+											sys.columns							[z]
+												ON	([y].[object_id]		=	[z].[object_id])
+												AND	([y].[column_id]		=	[z].[column_id])
+										WHERE
+												([y].[is_included_column]	=	1)
+											AND	([y].[object_id]			=	[i].[object_id])
+											AND	([y].[index_id]				=	[i].[index_id])
+										ORDER BY
+											[y].[key_ordinal]	ASC
+										FOR XML PATH(N'')), 1, 2, N''),
+
+		[ColumnsAll]				= STUFF((
+										SELECT
+											N', ' + [z].[name]
+										FROM
+											sys.index_columns					[y]
+										INNER JOIN
+											sys.columns							[z]
+												ON	([y].[object_id]		=	[z].[object_id])
+												AND	([y].[column_id]		=	[z].[column_id])
+										WHERE
+												([y].[object_id]			=	[i].[object_id])
+											AND	([y].[index_id]				=	[i].[index_id])
+										ORDER BY
+											[z].[name]	ASC
+										FOR XML PATH(N'')), 1, 2, N''),
+
+		[FileGroup]					= [d].[name],
+
+		[FileGroupDescription]		= CASE [d].[type]
+										WHEN 'FG'	THEN 'Filegroup'
+										WHEN 'FD'	THEN 'Filestream'
+										WHEN 'FX'	THEN 'Memory-optimized'
+										WHEN 'PS'	THEN 'Partition scheme'
+										END,
+
+		[FileGroupIsDefault]		= CASE [d].[is_default]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[FileGroupIsSystem]			= CASE [d].[is_system]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[IgnoreDuplicateKey]		= CASE [i].[ignore_dup_key]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[FillFactor]				= [i].[fill_factor],
+
+		[IsPadded]					= CASE [i].[is_padded]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[IsEnabled]					= CASE [i].[is_disabled]
+										WHEN 0	THEN 'Yes'		--	Enabled
+										WHEN 1	THEN 'No'		--	Disabled
+										END,
+
+		[IsDisabled]				= CASE [i].[is_disabled]
+										WHEN 0	THEN 'No'		--	Enabled
+										WHEN 1	THEN 'Yes'		--	Disabled
+										END,
+
+		[IsHypothetical]			= CASE [i].[is_hypothetical]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[IsIgnoredInOptimization]	= CASE [i].[is_ignored_in_optimization]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[AllowRowLocks]				= CASE [i].[allow_row_locks]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[AllowPageLocks]			= CASE [i].[allow_page_locks]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[IsFiltered]				= CASE [i].[has_filter]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[FilterDefinition]			= [i].[filter_definition],
+
+		[CompressionDelayMinutes]	= [i].[compression_delay],
+
+		[SuppressDupKeyMessages]	= CASE [i].[suppress_dup_key_messages]
+										WHEN 0	THEN 'No'		--	Show
+										WHEN 1	THEN 'Yes'		--	Hide (Suppress)
+										END,
+
+		[IsAutoCreated]				= CASE [i].[auto_created]
+										WHEN 0	THEN 'No'		--	User
+										WHEN 1	THEN 'Yes'		--	Auto
+										END,
+
+		[OptimizeForSequentialKey]	= CONVERT(VARCHAR(3), NULL),
+		--[OptimizeForSequentialKey]	= CASE [i].[optimize_for_sequential_key]
+		--								WHEN 0	THEN 'No'		--	Disabled
+		--								WHEN 1	THEN 'Yes'		--	Enabled
+		--								END,
+		
+	---------------------------------------------------------------------------------
+	---------------------------------------------------------------------------------
+
+		[IsRowCount]				= IIF(([i].[index_id] <= 1) AND ([a].[type] = 1), 'Yes', 'No'),
+
+		[RowCount]					= [p].[rows],
+
+		[DataCompression]			= CASE [p].[data_compression]
+										WHEN 0	THEN 'None'
+										WHEN 1	THEN 'Row'
+										WHEN 2	THEN 'Page'
+										WHEN 3	THEN 'Columnstore'
+										WHEN 4	THEN 'Columnstore (Archive)'
+										ELSE [p].[data_compression_desc]
+										END,
+
+		[AllocationType]			= CASE [a].[type]
+										WHEN 0	THEN 'Dropped'
+										WHEN 1	THEN 'In-row data'
+										WHEN 2	THEN 'Large object (LOB)'
+										WHEN 3	THEN 'Row-overflow'
+										ELSE [a].[type_desc]
+										END,
+
+		[AllocationTotalPages]		= [a].[total_pages],
+		[AllocationUsedPages]		= [a].[used_pages],
+		[AllocationDataPages]		= [a].[data_pages],
+		[AllocationFreePages]		= ([a].[total_pages] - [a].[used_pages]),
+
+		[AllocationTotalMb]			= (8.0 * CONVERT(FLOAT, [a].[total_pages]))	/ 1024.0,
+		[AllocationUsedMb]			= (8.0 * CONVERT(FLOAT, [a].[used_pages]))	/ 1024.0,
+		[AllocationDataMb]			= (8.0 * CONVERT(FLOAT, [a].[data_pages]))	/ 1024.0,
+		[AllocationFreeMb]			= (8.0 * CONVERT(FLOAT, [a].[total_pages] - [a].[used_pages]))	/ 1024.0
+
+FROM
+	sys.schemas							[s]
+INNER JOIN
+	sys.objects							[o]
+		ON	([s].[schema_id]		=	[o].[schema_id])
+		AND	([o].[is_ms_shipped]	=	0)
+INNER JOIN
+	sys.indexes							[i]
+		ON	([o].[object_id]		=	[i].[object_id])
+INNER JOIN
+	sys.data_spaces 					[d]
+		ON	([i].[data_space_id]	=	[d].[data_space_id])
+INNER JOIN
+	sys.partitions						[p]
+		ON	([i].[object_id]		=	[p].[object_id])
+		AND	([i].[index_id]			=	[p].[index_id])
+INNER JOIN
+	sys.allocation_units				[a]
+		ON	([i].[data_space_id]	=	[a].[data_space_id])
+		AND	([p].[partition_id]		=	[a].[container_id])]]></Value>
+			</Property>
+			<Property Name="IsAnsiNullsOn" Value="True" />
+			<Relationship Name="Columns">
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[instance_id]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[database_id]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[schema_id]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[schemas].[schema_id]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[object_id]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects].[object_id]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[index_id]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[index_id]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[partition_id]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[partitions].[partition_id]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[partition_number]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[partitions].[partition_number]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[hobt_id]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[partitions].[hobt_id]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[allocation_unit_id]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[allocation_units].[allocation_unit_id]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[container_id]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[allocation_units].[container_id]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[Instance]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[InstanceHost]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[InstanceName]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[DatabaseType]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[SystemDatabaseType]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[ObjectGroup]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[ObjectGroup]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[ObjectType]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[ObjectType]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[DatabaseName]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[SchemaName]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[schemas].[name]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[ObjectName]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects].[name]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[IndexName]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[IndexType]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[IndexTypeClustering]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[IsPrimaryKey]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[IsUnique]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[IsUniqueConstraint]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[IsSingleColumn]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[ColumnsKey]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[ColumnsKeyAll]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[ColumnsIncluded]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[ColumnsAll]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[FileGroup]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[data_spaces].[name]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[FileGroupDescription]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[FileGroupIsDefault]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[FileGroupIsSystem]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[IgnoreDuplicateKey]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[FillFactor]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[fill_factor]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[IsPadded]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[IsEnabled]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[IsDisabled]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[IsHypothetical]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[IsIgnoredInOptimization]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[AllowRowLocks]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[AllowPageLocks]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[IsFiltered]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[FilterDefinition]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[filter_definition]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[CompressionDelayMinutes]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[compression_delay]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[SuppressDupKeyMessages]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[IsAutoCreated]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[OptimizeForSequentialKey]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[IsRowCount]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[RowCount]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[partitions].[rows]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[DataCompression]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[AllocationType]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[AllocationTotalPages]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[allocation_units].[total_pages]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[AllocationUsedPages]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[allocation_units].[used_pages]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[AllocationDataPages]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[allocation_units].[data_pages]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[AllocationFreePages]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[AllocationTotalMb]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[AllocationUsedMb]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[AllocationDataMb]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesAllocation].[AllocationFreeMb]" />
+				</Entry>
+			</Relationship>
+			<Relationship Name="QueryDependencies">
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[schemas]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[schemas].[schema_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects].[schema_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects].[is_ms_shipped]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[data_spaces]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[data_space_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[data_spaces].[data_space_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[partitions]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[partitions].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[index_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[partitions].[index_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[allocation_units]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[data_space_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[allocation_units].[data_space_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[partitions].[partition_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[allocation_units].[container_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[schemas].[schema_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[index_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[partitions].[partition_number]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[partitions].[hobt_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[allocation_units].[allocation_unit_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[varchar]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[SystemDatabaseType]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects].[type]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[ObjectGroup]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[ObjectType]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[schemas].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[type]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[is_primary_key]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[is_unique]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[is_unique_constraint]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns].[index_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[index_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[columns]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[columns].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns].[column_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[columns].[column_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[columns].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns].[is_descending_key]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns].[is_included_column]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns].[index_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[index_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns].[key_ordinal]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[data_spaces].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[data_spaces].[type]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[data_spaces].[is_default]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[data_spaces].[is_system]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[ignore_dup_key]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[fill_factor]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[is_padded]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[is_disabled]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[is_hypothetical]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[is_ignored_in_optimization]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[allow_row_locks]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[allow_page_locks]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[has_filter]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[filter_definition]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[compression_delay]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[suppress_dup_key_messages]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[auto_created]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[allocation_units].[type]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[partitions].[rows]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[partitions].[data_compression]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[partitions].[data_compression_desc]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[allocation_units].[type_desc]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[allocation_units].[total_pages]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[allocation_units].[used_pages]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[allocation_units].[data_pages]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[allocation_units].[total_pages]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[allocation_units].[used_pages]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[float]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[allocation_units].[data_pages]" />
+				</Entry>
+			</Relationship>
+			<Relationship Name="Schema">
+				<Entry>
+					<References Name="[smash]" />
+				</Entry>
+			</Relationship>
+			<Annotation Type="SysCommentsObjectAnnotation">
+				<Property Name="Length" Value="8810" />
+				<Property Name="StartLine" Value="1" />
+				<Property Name="StartColumn" Value="1" />
+				<Property Name="HeaderContents" Value="CREATE VIEW [smash].[DatabaseIndexesAllocation]&#xD;&#xA;WITH VIEW_METADATA&#xD;&#xA;AS" />
+				<Property Name="FooterContents" Value=";" />
+			</Annotation>
+		</Element>
+		<Element Type="SqlView" Name="[smash].[DatabaseIndexesDuplicate]">
+			<Property Name="IsMetadataReported" Value="True" />
+			<Property Name="QueryScript">
+				<Value><![CDATA[
+SELECT
+	[i].[instance_id],
+	[i].[database_id],
+	[i].[schema_id],
+	[i].[object_id],
+	[i].[index_id],
+
+	[i].[Instance],
+	[i].[InstanceHost],
+	[i].[InstanceName],
+
+	[i].[DatabaseType],
+	[i].[ObjectGroup],
+	[i].[ObjectType],
+
+	[i].[DatabaseName],
+	[i].[SchemaName],
+	[i].[ObjectName],
+	[i].[IndexName],
+
+	[i].[IndexType],
+	[i].[IndexTypeClustering],
+
+	[i].[ColumnsKey],
+	[i].[ColumnsKeyAll],
+	[i].[ColumnsIncluded],
+	[i].[ColumnsAll]
+FROM
+	[smash].[DatabaseIndexes]		[i]
+WHERE EXISTS (
+	SELECT TOP 1 1
+	FROM
+		[smash].[DatabaseIndexes]	[t]
+	WHERE
+			([t].[schema_id]		=	[i].[schema_id])
+		AND	([t].[object_id]		=	[i].[object_id])
+		AND	([t].[index_id]			<>	[i].[index_id])
+
+		AND	(
+				(	([t].[ColumnsKey]							=	[i].[ColumnsKey])
+					AND	(COALESCE([t].[ColumnsIncluded], N'')	=	COALESCE([i].[ColumnsIncluded], N''))
+				)
+			OR	(	([t].[ColumnsKey] LIKE LEFT([i].[ColumnsKey], LEN([t].[ColumnsKey])))
+				OR	([i].[ColumnsKey] LIKE LEFT([t].[ColumnsKey], LEN([i].[ColumnsKey])))
+				)
+			OR	(	([t].[ColumnsKeyAll] LIKE LEFT([i].[ColumnsKeyAll], LEN([t].[ColumnsKeyAll])))
+				OR	([i].[ColumnsKeyAll] LIKE LEFT([t].[ColumnsKeyAll], LEN([i].[ColumnsKeyAll])))
+				)
+			OR	(	([t].[ColumnsAll] LIKE LEFT([i].[ColumnsAll], LEN([t].[ColumnsAll])))
+				OR	([i].[ColumnsAll] LIKE LEFT([t].[ColumnsAll], LEN([i].[ColumnsAll])))
+				)
+			)
+	)]]></Value>
+			</Property>
+			<Property Name="IsAnsiNullsOn" Value="True" />
+			<Relationship Name="Columns">
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesDuplicate].[instance_id]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[DatabaseIndexes].[instance_id]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesDuplicate].[database_id]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[DatabaseIndexes].[database_id]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesDuplicate].[schema_id]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[DatabaseIndexes].[schema_id]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesDuplicate].[object_id]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[DatabaseIndexes].[object_id]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesDuplicate].[index_id]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[DatabaseIndexes].[index_id]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesDuplicate].[Instance]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[DatabaseIndexes].[Instance]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesDuplicate].[InstanceHost]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[DatabaseIndexes].[InstanceHost]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesDuplicate].[InstanceName]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[DatabaseIndexes].[InstanceName]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesDuplicate].[DatabaseType]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[DatabaseIndexes].[DatabaseType]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesDuplicate].[ObjectGroup]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[DatabaseIndexes].[ObjectGroup]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesDuplicate].[ObjectType]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[DatabaseIndexes].[ObjectType]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesDuplicate].[DatabaseName]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[DatabaseIndexes].[DatabaseName]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesDuplicate].[SchemaName]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[DatabaseIndexes].[SchemaName]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesDuplicate].[ObjectName]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[DatabaseIndexes].[ObjectName]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesDuplicate].[IndexName]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[DatabaseIndexes].[IndexName]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesDuplicate].[IndexType]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[DatabaseIndexes].[IndexType]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesDuplicate].[IndexTypeClustering]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[DatabaseIndexes].[IndexTypeClustering]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesDuplicate].[ColumnsKey]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[DatabaseIndexes].[ColumnsKey]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesDuplicate].[ColumnsKeyAll]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[DatabaseIndexes].[ColumnsKeyAll]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesDuplicate].[ColumnsIncluded]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[DatabaseIndexes].[ColumnsIncluded]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesDuplicate].[ColumnsAll]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[DatabaseIndexes].[ColumnsAll]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+			</Relationship>
+			<Relationship Name="QueryDependencies">
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[instance_id]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[database_id]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[schema_id]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[object_id]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[index_id]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[Instance]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[InstanceHost]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[InstanceName]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[DatabaseType]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[ObjectGroup]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[ObjectType]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[DatabaseName]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[SchemaName]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[ObjectName]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[IndexName]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[IndexType]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[IndexTypeClustering]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[ColumnsKey]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[ColumnsKeyAll]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[ColumnsIncluded]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[ColumnsAll]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[schema_id]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[schema_id]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[object_id]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[object_id]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[index_id]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[index_id]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[ColumnsKey]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[ColumnsKey]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[ColumnsIncluded]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[ColumnsIncluded]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[ColumnsKeyAll]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[ColumnsKeyAll]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[ColumnsAll]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DatabaseIndexes].[ColumnsAll]" />
+				</Entry>
+			</Relationship>
+			<Relationship Name="Schema">
+				<Entry>
+					<References Name="[smash]" />
+				</Entry>
+			</Relationship>
+			<Annotation Type="SysCommentsObjectAnnotation">
+				<Property Name="Length" Value="1454" />
+				<Property Name="StartLine" Value="1" />
+				<Property Name="StartColumn" Value="1" />
+				<Property Name="HeaderContents" Value="CREATE VIEW [smash].[DatabaseIndexesDuplicate]&#xD;&#xA;WITH VIEW_METADATA&#xD;&#xA;AS" />
+				<Property Name="FooterContents" Value=";" />
+			</Annotation>
+		</Element>
+		<Element Type="SqlView" Name="[smash].[DatabaseIndexesPhysical]">
+			<Property Name="IsMetadataReported" Value="True" />
+			<Property Name="QueryScript">
+				<Value><![CDATA[
+SELECT
+		[instance_id]				= CHECKSUM(@@SERVERNAME),
+		[database_id]				= DB_ID(),
+	[s].[schema_id],
+	[o].[object_id],
+	[i].[index_id],
+
+	[p].[partition_id],
+	[p].[partition_number],
+	[p].[hobt_id],
+
+	---------------------------------------------------------------------------------
+	---------------------------------------------------------------------------------
+
+		[Instance]					= @@SERVERNAME,
+		[InstanceHost]				= CAST(SERVERPROPERTY('MachineName') AS VARCHAR),
+		[InstanceName]				= @@SERVICENAME,
+
+		[DatabaseType]				= [smash].[SystemDatabaseType](DB_ID()),
+		[ObjectGroup]				= [smash].[ObjectGroup]([o].[type]),
+		[ObjectType]				= [smash].[ObjectType]([o].[type]),
+
+		[DatabaseName]				= DB_NAME(),
+		[SchemaName]				= [s].[name],
+		[ObjectName]				= [o].[name],
+		[IndexName]					= COALESCE([i].[name], N'Heap'),
+
+		[IndexType]					= CASE [i].[type]
+										WHEN 0	THEN 'Heap'
+										WHEN 1	THEN 'Rowstore'
+										WHEN 2	THEN 'Rowstore'
+										WHEN 3	THEN 'XML'
+										WHEN 4	THEN 'Spatial'
+										WHEN 5	THEN 'Columnstore'
+										WHEN 6	THEN 'Columnstore'
+										WHEN 7	THEN 'Hash'
+										END,
+
+		[IndexTypeClustering]		= CASE [i].[type]
+										WHEN 0	THEN 'Heap'
+										WHEN 1	THEN 'Clustered'
+										WHEN 2	THEN 'Nonclustered'
+										WHEN 3	THEN 'XML'
+										WHEN 4	THEN 'Spatial'
+										WHEN 5	THEN 'Clustered'
+										WHEN 6	THEN 'Nonclustered'
+										WHEN 7	THEN 'Nonclustered'
+										END,
+
+		[IsPrimaryKey]				= CASE [i].[is_primary_key]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[IsUnique]					= CASE [i].[is_unique]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[IsUniqueConstraint]		= CASE [i].[is_unique_constraint]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[IsSingleColumn]			= CASE WHEN ((SELECT COUNT(*) FROM sys.index_columns [x] WHERE ([x].[object_id] = [i].[object_id]) AND ([x].[index_id] = [i].[index_id])) = 1)
+										THEN 'Yes'
+										ELSE 'No'
+										END,
+
+		[ColumnsKey]				= STUFF((
+										SELECT
+											N', ' + [z].[name] + IIF(([y].[is_descending_key] = 0), N' ASC', N' DESC')
+										FROM
+											sys.index_columns					[y]
+										INNER JOIN
+											sys.columns							[z]
+												ON	([y].[object_id]		=	[z].[object_id])
+												AND	([y].[column_id]		=	[z].[column_id])
+										WHERE
+												([y].[is_included_column]	=	0)
+											AND	([y].[object_id]			=	[i].[object_id])
+											AND	([y].[index_id]				=	[i].[index_id])
+										ORDER BY
+											[y].[key_ordinal]	ASC
+										FOR XML PATH(N'')), 1, 2, N''),
+
+		[ColumnsKeyAll]				= STUFF((
+										SELECT
+											N', ' + [z].[name]
+										FROM
+											sys.index_columns					[y]
+										INNER JOIN
+											sys.columns							[z]
+												ON	([y].[object_id]		=	[z].[object_id])
+												AND	([y].[column_id]		=	[z].[column_id])
+										WHERE
+												([y].[is_included_column]	=	0)
+											AND	([y].[object_id]			=	[i].[object_id])
+											AND	([y].[index_id]				=	[i].[index_id])
+										ORDER BY
+											[z].[name]	ASC
+										FOR XML PATH(N'')), 1, 2, N''),
+
+		[ColumnsIncluded]			= STUFF((
+										SELECT
+											N', ' + [z].[name]
+										FROM
+											sys.index_columns					[y]
+										INNER JOIN
+											sys.columns							[z]
+												ON	([y].[object_id]		=	[z].[object_id])
+												AND	([y].[column_id]		=	[z].[column_id])
+										WHERE
+												([y].[is_included_column]	=	1)
+											AND	([y].[object_id]			=	[i].[object_id])
+											AND	([y].[index_id]				=	[i].[index_id])
+										ORDER BY
+											[y].[key_ordinal]	ASC
+										FOR XML PATH(N'')), 1, 2, N''),
+
+		[ColumnsAll]				= STUFF((
+										SELECT
+											N', ' + [z].[name]
+										FROM
+											sys.index_columns					[y]
+										INNER JOIN
+											sys.columns							[z]
+												ON	([y].[object_id]		=	[z].[object_id])
+												AND	([y].[column_id]		=	[z].[column_id])
+										WHERE
+												([y].[object_id]			=	[i].[object_id])
+											AND	([y].[index_id]				=	[i].[index_id])
+										ORDER BY
+											[z].[name]	ASC
+										FOR XML PATH(N'')), 1, 2, N''),
+
+		[FileGroup]					= [d].[name],
+
+		[FileGroupDescription]		= CASE [d].[type]
+										WHEN 'FG'	THEN 'Filegroup'
+										WHEN 'FD'	THEN 'Filestream'
+										WHEN 'FX'	THEN 'Memory-optimized'
+										WHEN 'PS'	THEN 'Partition scheme'
+										END,
+
+		[FileGroupIsDefault]		= CASE [d].[is_default]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[FileGroupIsSystem]			= CASE [d].[is_system]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[IgnoreDuplicateKey]		= CASE [i].[ignore_dup_key]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[FillFactor]				= [i].[fill_factor],
+
+		[IsPadded]					= CASE [i].[is_padded]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[IsEnabled]					= CASE [i].[is_disabled]
+										WHEN 0	THEN 'Yes'		--	Enabled
+										WHEN 1	THEN 'No'		--	Disabled
+										END,
+
+		[IsDisabled]				= CASE [i].[is_disabled]
+										WHEN 0	THEN 'No'		--	Enabled
+										WHEN 1	THEN 'Yes'		--	Disabled
+										END,
+
+		[IsHypothetical]			= CASE [i].[is_hypothetical]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[IsIgnoredInOptimization]	= CASE [i].[is_ignored_in_optimization]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[AllowRowLocks]				= CASE [i].[allow_row_locks]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[AllowPageLocks]			= CASE [i].[allow_page_locks]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[IsFiltered]				= CASE [i].[has_filter]
+										WHEN 0	THEN 'No'
+										WHEN 1	THEN 'Yes'
+										END,
+
+		[FilterDefinition]			= [i].[filter_definition],
+
+		[CompressionDelayMinutes]	= [i].[compression_delay],
+
+		[SuppressDupKeyMessages]	= CASE [i].[suppress_dup_key_messages]
+										WHEN 0	THEN 'No'		--	Show
+										WHEN 1	THEN 'Yes'		--	Hide (Suppress)
+										END,
+
+		[IsAutoCreated]				= CASE [i].[auto_created]
+										WHEN 0	THEN 'No'		--	User
+										WHEN 1	THEN 'Yes'		--	Auto
+										END,
+
+		[OptimizeForSequentialKey]	= CONVERT(VARCHAR(3), NULL),
+		--[OptimizeForSequentialKey]	= CASE [i].[optimize_for_sequential_key]
+		--								WHEN 0	THEN 'No'		--	Disabled
+		--								WHEN 1	THEN 'Yes'		--	Enabled
+		--								END,
+		
+	---------------------------------------------------------------------------------
+	---------------------------------------------------------------------------------
+
+		[IndexTypePhysical]				= CASE [x].[index_type_desc]
+											WHEN 'HEAP'								THEN 'Heap'
+											WHEN 'CLUSTERED INDEX'					THEN 'Rowstore (Clustered)'
+											WHEN 'NONCLUSTERED INDEX'				THEN 'Rowstore (Nonclustered)'
+											WHEN 'XML INDEX'						THEN 'XML'
+											WHEN 'PRIMARY XML INDEX'				THEN 'XML (Primary)'
+											WHEN 'EXTENDED INDEX'					THEN 'Extended'
+											WHEN 'COLUMNSTORE MAPPING INDEX'		THEN 'Columnstore (Mapping)'
+											WHEN 'COLUMNSTORE DELETEBUFFER INDEX'	THEN 'Columnstore (Delete Buffer)'
+											WHEN 'COLUMNSTORE DELETEBITMAP INDEX'	THEN 'Columnstore (Delete Bitmap)'
+											ELSE [x].[index_type_desc]
+											END,
+
+		[AllocationType]				= CASE [x].[alloc_unit_type_desc]
+											WHEN 'DROPPED'				THEN 'Dropped'
+											WHEN 'IN_ROW_DATA'			THEN 'In-row data'
+											WHEN 'LOB_DATA'				THEN 'Large object (LOB)'
+											WHEN 'ROW_OVERFLOW_DATA'	THEN 'Row-overflow'
+											ELSE [x].[alloc_unit_type_desc]
+											END,
+
+		[IndexDepth]					= [x].[index_depth],
+		[IndexLevel]					= [x].[index_level],
+
+		[FragmentationPcnt]				= [x].[avg_fragmentation_in_percent] / 100.0,
+
+		[FragmentCount]					= [x].[fragment_count],
+		[FragmentSizePages]				= [x].[avg_fragment_size_in_pages],
+		[FragmentSizeMb]				= (8.0 / 1024.0 * [x].[avg_fragment_size_in_pages]),
+
+		[DataPages]						= [x].[page_count],
+		[DataMb]						= (8.0 * CONVERT(FLOAT, [x].[page_count])) / 1024.0,
+
+		[DataCompressedPages]			= [x].[compressed_page_count],
+		[DataCompressedMb]				= (8.0 * CONVERT(FLOAT, [x].[compressed_page_count])) / 1024.0,
+
+		[FragmentPageSpaceUsedPcnt]		= [x].[avg_page_space_used_in_percent] / 100.0,
+
+		[RecordCount]					= [x].[record_count],
+		[RecordCountGhost]				= [x].[ghost_record_count],
+		[RecordCountGhostVersion]		= [x].[version_ghost_record_count],
+		[RecordCountForwarded]			= [x].[forwarded_record_count],
+
+		[RecordSizeMinByte]				= [x].[min_record_size_in_bytes],
+		[RecordSizeMaxByte]				= [x].[max_record_size_in_bytes],
+		[RecordSizeAvgByte]				= [x].[avg_record_size_in_bytes],
+
+		[ColumnstoreDeleteBufferState]	= CASE [x].[columnstore_delete_buffer_state]
+											WHEN 0	THEN 'Not Applicable'
+											WHEN 1	THEN 'Open'
+											WHEN 2	THEN 'Draining'
+											WHEN 3	THEN 'Flushing'
+											WHEN 4	THEN 'Retiring'
+											WHEN 5	THEN 'Ready'
+											ELSE [x].[columnstore_delete_buffer_state_desc]
+											END,
+
+		[RecordCountVersion]			= [x].[version_record_count],
+		[RecordCountVersionInRow]		= [x].[inrow_version_record_count],
+		[RecordCountVersionDiff]		= [x].[inrow_diff_version_record_count],
+		[RecordCountVersionInRowByte]	= [x].[total_inrow_version_payload_size_in_bytes],
+		[RecordCountVersionOffRow]		= [x].[offrow_regular_version_record_count],
+		[RecordCountVersionOffRowLong]	= [x].[offrow_long_term_version_record_count]
+
+FROM
+	sys.schemas							[s]
+INNER JOIN
+	sys.objects							[o]
+		ON	([s].[schema_id]		=	[o].[schema_id])
+		AND	([o].[is_ms_shipped]	=	0)
+INNER JOIN
+	sys.indexes							[i]
+		ON	([o].[object_id]		=	[i].[object_id])
+INNER JOIN
+	sys.data_spaces 					[d]
+		ON	([i].[data_space_id]	=	[d].[data_space_id])
+INNER JOIN
+	sys.partitions						[p]
+		ON	([i].[object_id]		=	[p].[object_id])
+		AND	([i].[index_id]			=	[p].[index_id])
+CROSS APPLY
+	sys.dm_db_index_physical_stats(DB_ID(), [o].[object_id], [i].[index_id], [p].[partition_number], 'DETAILED')	[x]]]></Value>
+			</Property>
+			<Property Name="IsAnsiNullsOn" Value="True" />
+			<Relationship Name="Columns">
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[instance_id]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[database_id]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[schema_id]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[schemas].[schema_id]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[object_id]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects].[object_id]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[index_id]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[index_id]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[partition_id]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[partitions].[partition_id]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[partition_number]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[partitions].[partition_number]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[hobt_id]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[partitions].[hobt_id]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[Instance]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[InstanceHost]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[InstanceName]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[DatabaseType]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[SystemDatabaseType]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[ObjectGroup]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[ObjectGroup]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[ObjectType]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[smash].[ObjectType]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[DatabaseName]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[SchemaName]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[schemas].[name]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[ObjectName]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects].[name]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[IndexName]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[IndexType]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[IndexTypeClustering]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[IsPrimaryKey]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[IsUnique]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[IsUniqueConstraint]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[IsSingleColumn]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[ColumnsKey]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[ColumnsKeyAll]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[ColumnsIncluded]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[ColumnsAll]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[FileGroup]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[data_spaces].[name]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[FileGroupDescription]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[FileGroupIsDefault]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[FileGroupIsSystem]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[IgnoreDuplicateKey]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[FillFactor]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[fill_factor]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[IsPadded]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[IsEnabled]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[IsDisabled]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[IsHypothetical]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[IsIgnoredInOptimization]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[AllowRowLocks]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[AllowPageLocks]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[IsFiltered]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[FilterDefinition]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[filter_definition]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[CompressionDelayMinutes]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[compression_delay]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[SuppressDupKeyMessages]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[IsAutoCreated]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[OptimizeForSequentialKey]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[IndexTypePhysical]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[AllocationType]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[IndexDepth]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[index_depth]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[IndexLevel]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[index_level]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[FragmentationPcnt]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[FragmentCount]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[fragment_count]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[FragmentSizePages]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[avg_fragment_size_in_pages]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[FragmentSizeMb]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[DataPages]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[page_count]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[DataMb]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[DataCompressedPages]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[compressed_page_count]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[DataCompressedMb]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[FragmentPageSpaceUsedPcnt]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[RecordCount]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[record_count]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[RecordCountGhost]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[ghost_record_count]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[RecordCountGhostVersion]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[version_ghost_record_count]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[RecordCountForwarded]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[forwarded_record_count]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[RecordSizeMinByte]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[min_record_size_in_bytes]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[RecordSizeMaxByte]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[max_record_size_in_bytes]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[RecordSizeAvgByte]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[avg_record_size_in_bytes]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[ColumnstoreDeleteBufferState]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[RecordCountVersion]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[version_record_count]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[RecordCountVersionInRow]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[inrow_version_record_count]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[RecordCountVersionDiff]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[inrow_diff_version_record_count]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[RecordCountVersionInRowByte]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[total_inrow_version_payload_size_in_bytes]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[RecordCountVersionOffRow]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[offrow_regular_version_record_count]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[smash].[DatabaseIndexesPhysical].[RecordCountVersionOffRowLong]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[offrow_long_term_version_record_count]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+			</Relationship>
+			<Relationship Name="QueryDependencies">
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[schemas]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[schemas].[schema_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects].[schema_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects].[is_ms_shipped]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[data_spaces]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[data_space_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[data_spaces].[data_space_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[partitions]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[partitions].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[index_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[partitions].[index_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[partitions].[partition_number]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[schemas].[schema_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[index_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[partitions].[partition_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[partitions].[partition_number]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[partitions].[hobt_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[varchar]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[SystemDatabaseType]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects].[type]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[ObjectGroup]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[ObjectType]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[schemas].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[objects].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[type]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[is_primary_key]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[is_unique]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[is_unique_constraint]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns].[index_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[index_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[columns]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[columns].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns].[column_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[columns].[column_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[columns].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns].[is_descending_key]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns].[is_included_column]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns].[index_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[index_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[index_columns].[key_ordinal]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[data_spaces].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[data_spaces].[type]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[data_spaces].[is_default]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[data_spaces].[is_system]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[ignore_dup_key]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[fill_factor]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[is_padded]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[is_disabled]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[is_hypothetical]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[is_ignored_in_optimization]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[allow_row_locks]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[allow_page_locks]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[has_filter]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[filter_definition]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[compression_delay]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[suppress_dup_key_messages]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[auto_created]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[index_type_desc]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[alloc_unit_type_desc]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[index_depth]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[index_level]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[avg_fragmentation_in_percent]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[fragment_count]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[avg_fragment_size_in_pages]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[avg_fragment_size_in_pages]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[page_count]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[float]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[page_count]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[compressed_page_count]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[compressed_page_count]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[avg_page_space_used_in_percent]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[record_count]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[ghost_record_count]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[version_ghost_record_count]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[forwarded_record_count]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[min_record_size_in_bytes]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[max_record_size_in_bytes]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[avg_record_size_in_bytes]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[columnstore_delete_buffer_state]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[columnstore_delete_buffer_state_desc]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[version_record_count]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[inrow_version_record_count]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[inrow_diff_version_record_count]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[total_inrow_version_payload_size_in_bytes]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[offrow_regular_version_record_count]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[dm_db_index_physical_stats].[offrow_long_term_version_record_count]" />
+				</Entry>
+			</Relationship>
+			<Relationship Name="Schema">
+				<Entry>
+					<References Name="[smash]" />
+				</Entry>
+			</Relationship>
+			<Annotation Type="SysCommentsObjectAnnotation">
+				<Property Name="Length" Value="10480" />
+				<Property Name="StartLine" Value="1" />
+				<Property Name="StartColumn" Value="1" />
+				<Property Name="HeaderContents" Value="CREATE VIEW [smash].[DatabaseIndexesPhysical]&#xD;&#xA;WITH VIEW_METADATA&#xD;&#xA;AS" />
+				<Property Name="FooterContents" Value=";" />
+			</Annotation>
+		</Element>
+		<Element Type="SqlScalarFunction" Name="[smash].[DoesIndexExist]">
+			<Property Name="DoReturnNullForNullInput" Value="True" />
+			<Property Name="IsAnsiNullsOn" Value="True" />
+			<Relationship Name="BodyDependencies">
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[int]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[schemas]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[tables]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[schemas].[schema_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[tables].[schema_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[tables].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[object_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[schemas].[name]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DoesIndexExist].[@Schema]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[tables].[name]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DoesIndexExist].[@Table]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[indexes].[name]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[DoesIndexExist].[@Index]" />
+				</Entry>
+			</Relationship>
+			<Relationship Name="FunctionBody">
+				<Entry>
+					<Element Type="SqlScriptFunctionImplementation">
+						<Property Name="BodyScript">
+							<Value><![CDATA[
+BEGIN
+
+	DECLARE	@Exists		INT;
+
+	SELECT TOP (1)
+		@Exists = 1
+	FROM
+		sys.schemas						[s]	WITH (NOLOCK)
+	INNER JOIN
+		sys.tables						[t]	WITH (NOLOCK)
+			ON	([s].[schema_id]	=	[t].[schema_id])
+	INNER JOIN
+		sys.indexes						[i]	WITH (NOLOCK)
+			ON	([t].[object_id]	=	[i].[object_id])
+	WHERE
+			([s].[name]	= @Schema)
+		AND	([t].[name]	= @Table)
+		AND	([i].[name]	= @Index);
+
+	RETURN COALESCE(@Exists, 0);
+
+END;]]></Value>
+						</Property>
+						<Annotation Type="SysCommentsObjectAnnotation">
+							<Property Name="Length" Value="605" />
+							<Property Name="StartLine" Value="1" />
+							<Property Name="StartColumn" Value="1" />
+							<Property Name="HeaderContents" Value="CREATE FUNCTION [smash].[DoesIndexExist]&#xD;&#xA;(&#xD;&#xA;&#x9;@Schema&#x9;&#x9;NVARCHAR(128),&#xD;&#xA;&#x9;@Table&#x9;&#x9;NVARCHAR(128),&#xD;&#xA;&#x9;@Index&#x9;&#x9;NVARCHAR(128)&#xD;&#xA;)&#xD;&#xA;RETURNS INT&#xD;&#xA;WITH RETURNS NULL ON NULL INPUT&#xD;&#xA;AS" />
+						</Annotation>
+					</Element>
+				</Entry>
+			</Relationship>
+			<Relationship Name="Parameters">
+				<Entry>
+					<Element Type="SqlSubroutineParameter" Name="[smash].[DoesIndexExist].[@Schema]">
+						<Relationship Name="Type">
+							<Entry>
+								<Element Type="SqlTypeSpecifier">
+									<Property Name="Length" Value="128" />
+									<Relationship Name="Type">
+										<Entry>
+											<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlSubroutineParameter" Name="[smash].[DoesIndexExist].[@Table]">
+						<Relationship Name="Type">
+							<Entry>
+								<Element Type="SqlTypeSpecifier">
+									<Property Name="Length" Value="128" />
+									<Relationship Name="Type">
+										<Entry>
+											<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlSubroutineParameter" Name="[smash].[DoesIndexExist].[@Index]">
+						<Relationship Name="Type">
+							<Entry>
+								<Element Type="SqlTypeSpecifier">
+									<Property Name="Length" Value="128" />
+									<Relationship Name="Type">
+										<Entry>
+											<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+			</Relationship>
+			<Relationship Name="Schema">
+				<Entry>
+					<References Name="[smash]" />
+				</Entry>
+			</Relationship>
+			<Relationship Name="Type">
+				<Entry>
+					<Element Type="SqlTypeSpecifier">
+						<Relationship Name="Type">
+							<Entry>
+								<References ExternalSource="BuiltIns" Name="[int]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+			</Relationship>
+		</Element>
+		<Element Type="SqlScalarFunction" Name="[smash].[ObjectGroup]">
+			<Property Name="IsSchemaBound" Value="True" />
+			<Property Name="IsAnsiNullsOn" Value="True" />
+			<Relationship Name="BodyDependencies">
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[varchar]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[ObjectGroup].[@Type]" />
+				</Entry>
+			</Relationship>
+			<Relationship Name="FunctionBody">
+				<Entry>
+					<Element Type="SqlScriptFunctionImplementation">
+						<Property Name="BodyScript">
+							<Value><![CDATA[
+BEGIN
+
+	DECLARE @Return	VARCHAR(40)
+
+	SET @Return = CASE @Type
+		WHEN 'AF'	THEN 'Function'
+		WHEN 'C'	THEN 'Constraint'
+		WHEN 'D'	THEN 'Constraint'
+		WHEN 'F'	THEN 'Key: Foreign'
+
+		WHEN 'FN'	THEN 'Function'
+		WHEN 'FS'	THEN 'Function'
+		WHEN 'FT'	THEN 'Function'
+		WHEN 'IF'	THEN 'Function'
+
+		WHEN 'IT'	THEN 'Table'
+		WHEN 'P'	THEN 'Stored Procedure'
+		WHEN 'PC'	THEN 'Stored Procedure'
+
+		WHEN 'PG'	THEN 'Plan guide'
+		WHEN 'PK'	THEN 'Key: Primary'
+		WHEN 'R'	THEN 'Rule (old-style, stand-alone)'
+		WHEN 'RF'	THEN 'Replication-filter-procedure'
+		WHEN 'S'	THEN 'Table'
+		WHEN 'SN'	THEN 'Synonym'
+		WHEN 'SO'	THEN 'Sequence Object'
+		WHEN 'U'	THEN 'Table'
+		WHEN 'V'	THEN 'View'
+		WHEN 'EC'	THEN 'Constraint'
+
+		-- 'Applies to: SQL Server 2012 (11.x) and later.'
+		WHEN 'SQ'	THEN 'Service Queue'
+		WHEN 'TA'	THEN 'Trigger'
+		WHEN 'TF'	THEN 'Function'
+		WHEN 'TR'	THEN 'Trigger'
+		WHEN 'TT'	THEN 'Table Type'
+		WHEN 'UQ'	THEN 'Constraint'
+		WHEN 'X'	THEN 'Stored Procedure'
+
+		-- 'Applies to: SQL Server 2016 (13.x) and later, Azure SQL Database, Azure Synapse Analytics (SQL Data Warehouse), Parallel Data Warehouse.'
+		WHEN 'ET'	THEN 'Table'
+		END
+
+	RETURN @Return;
+
+END;]]></Value>
+						</Property>
+						<Annotation Type="SysCommentsObjectAnnotation">
+							<Property Name="Length" Value="1329" />
+							<Property Name="StartLine" Value="1" />
+							<Property Name="StartColumn" Value="1" />
+							<Property Name="HeaderContents" Value="CREATE FUNCTION [smash].[ObjectGroup]&#xD;&#xA;(&#xD;&#xA;&#x9;@Type&#x9;VARCHAR(2)&#xD;&#xA;)&#xD;&#xA;RETURNS VARCHAR(40)&#xD;&#xA;WITH SCHEMABINDING&#xD;&#xA;AS" />
+						</Annotation>
+					</Element>
+				</Entry>
+			</Relationship>
+			<Relationship Name="Parameters">
+				<Entry>
+					<Element Type="SqlSubroutineParameter" Name="[smash].[ObjectGroup].[@Type]">
+						<Relationship Name="Type">
+							<Entry>
+								<Element Type="SqlTypeSpecifier">
+									<Property Name="Length" Value="2" />
+									<Relationship Name="Type">
+										<Entry>
+											<References ExternalSource="BuiltIns" Name="[varchar]" />
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+			</Relationship>
+			<Relationship Name="Schema">
+				<Entry>
+					<References Name="[smash]" />
+				</Entry>
+			</Relationship>
+			<Relationship Name="Type">
+				<Entry>
+					<Element Type="SqlTypeSpecifier">
+						<Property Name="Length" Value="40" />
+						<Relationship Name="Type">
+							<Entry>
+								<References ExternalSource="BuiltIns" Name="[varchar]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+			</Relationship>
+		</Element>
+		<Element Type="SqlScalarFunction" Name="[smash].[ObjectType]">
+			<Property Name="IsSchemaBound" Value="True" />
+			<Property Name="IsAnsiNullsOn" Value="True" />
+			<Relationship Name="BodyDependencies">
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[varchar]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[ObjectType].[@Type]" />
+				</Entry>
+			</Relationship>
+			<Relationship Name="FunctionBody">
+				<Entry>
+					<Element Type="SqlScriptFunctionImplementation">
+						<Property Name="BodyScript">
+							<Value><![CDATA[
+BEGIN
+
+	DECLARE @Return	VARCHAR(40)
+
+	SET @Return = CASE @Type
+		WHEN 'AF'	THEN 'Function: Aggregate CLR'
+		WHEN 'C'	THEN 'Constraint: Check'
+		WHEN 'D'	THEN 'Constraint: Default'
+		WHEN 'F'	THEN 'Constraint: Key: Foreign'
+
+		WHEN 'FN'	THEN 'Function: SQL Scalar'
+		WHEN 'FS'	THEN 'Function: CLR Assembly Scalar'
+		WHEN 'FT'	THEN 'Function: CLR Assembly Table-valued'
+		WHEN 'IF'	THEN 'Function: SQL Inline Table-valued'
+
+		WHEN 'IT'	THEN 'Table: Internal'
+		WHEN 'P'	THEN 'Stored Procedure: SQL'
+		WHEN 'PC'	THEN 'Stored Procedure: CLR'
+
+		WHEN 'PG'	THEN 'Plan Guide'
+		WHEN 'PK'	THEN 'Constraint: Key: Primary'
+		WHEN 'R'	THEN 'Rule (old-style, stand-alone)'
+		WHEN 'RF'	THEN 'Replication-filter-procedure'
+		WHEN 'S'	THEN 'Table: System Base'
+		WHEN 'SN'	THEN 'Synonym'
+		WHEN 'SO'	THEN 'Sequence Object'
+		WHEN 'U'	THEN 'Table: User Defined'
+		WHEN 'V'	THEN 'View'
+		WHEN 'EC'	THEN 'Constraint: Edge'
+
+		-- 'Applies to: SQL Server 2012 (11.x) and later.'
+		WHEN 'SQ'	THEN 'Service Queue'
+		WHEN 'TA'	THEN 'Trigger: Assembly (CLR) DML'
+		WHEN 'TF'	THEN 'Function: SQL Table-valued'
+		WHEN 'TR'	THEN 'Trigger: SQL DML'
+		WHEN 'TT'	THEN 'Table Type'
+		WHEN 'UQ'	THEN 'Constraint: Unique'
+		WHEN 'X'	THEN 'Stored Procedure: Extended'
+
+		-- 'Applies to: SQL Server 2016 (13.x) and later, Azure SQL Database, Azure Synapse Analytics (SQL Data Warehouse), Parallel Data Warehouse.'
+		WHEN 'ET'	THEN 'Table: External'
+		END
+
+	RETURN @Return;
+
+END;]]></Value>
+						</Property>
+						<Annotation Type="SysCommentsObjectAnnotation">
+							<Property Name="Length" Value="1596" />
+							<Property Name="StartLine" Value="1" />
+							<Property Name="StartColumn" Value="1" />
+							<Property Name="HeaderContents" Value="CREATE FUNCTION [smash].[ObjectType]&#xD;&#xA;(&#xD;&#xA;&#x9;@Type&#x9;VARCHAR(2)&#xD;&#xA;)&#xD;&#xA;RETURNS VARCHAR(40)&#xD;&#xA;WITH SCHEMABINDING&#xD;&#xA;AS" />
+						</Annotation>
+					</Element>
+				</Entry>
+			</Relationship>
+			<Relationship Name="Parameters">
+				<Entry>
+					<Element Type="SqlSubroutineParameter" Name="[smash].[ObjectType].[@Type]">
+						<Relationship Name="Type">
+							<Entry>
+								<Element Type="SqlTypeSpecifier">
+									<Property Name="Length" Value="2" />
+									<Relationship Name="Type">
+										<Entry>
+											<References ExternalSource="BuiltIns" Name="[varchar]" />
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+			</Relationship>
+			<Relationship Name="Schema">
+				<Entry>
+					<References Name="[smash]" />
+				</Entry>
+			</Relationship>
+			<Relationship Name="Type">
+				<Entry>
+					<Element Type="SqlTypeSpecifier">
+						<Property Name="Length" Value="40" />
+						<Relationship Name="Type">
+							<Entry>
+								<References ExternalSource="BuiltIns" Name="[varchar]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+			</Relationship>
+		</Element>
+		<Element Type="SqlScalarFunction" Name="[smash].[SystemDatabaseType]">
+			<Property Name="IsInline" Value="True" />
+			<Property Name="IsSchemaBound" Value="True" />
+			<Property Name="DoReturnNullForNullInput" Value="True" />
+			<Property Name="IsAnsiNullsOn" Value="True" />
+			<Relationship Name="BodyDependencies">
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[varchar]" />
+				</Entry>
+				<Entry>
+					<References Name="[smash].[SystemDatabaseType].[@DatabaseId]" />
+				</Entry>
+			</Relationship>
+			<Relationship Name="FunctionBody">
+				<Entry>
+					<Element Type="SqlScriptFunctionImplementation">
+						<Property Name="BodyScript">
+							<Value><![CDATA[
+BEGIN
+
+	DECLARE	@DatabaseType	VARCHAR(8)	= N'User';
+
+	SET	@DatabaseType =
+	CASE
+		WHEN (@DatabaseId <= 4)			THEN N'System'
+		WHEN (db_name(@DatabaseId) IN (
+				N'DWConfiguration',
+				N'DWDiagnostics',
+				N'DWQueue',
+				N'SSISDB',
+				N'SSRS',
+				N'SSRSTempDB'
+				)
+			)							THEN N'Support'
+		WHEN (db_name(@DatabaseId) LIKE N'AdventureWorks%')
+										THEN N'Training'
+	ELSE
+		@DatabaseType
+	END;
+
+	RETURN @DatabaseType;
+
+END;]]></Value>
+						</Property>
+						<Annotation Type="SysCommentsObjectAnnotation">
+							<Property Name="Length" Value="617" />
+							<Property Name="StartLine" Value="1" />
+							<Property Name="StartColumn" Value="1" />
+							<Property Name="HeaderContents" Value="CREATE FUNCTION [smash].[SystemDatabaseType]&#xD;&#xA;(&#xD;&#xA;&#x9;@DatabaseId&#x9;&#x9;INT&#xD;&#xA;)&#xD;&#xA;RETURNS NVARCHAR(8)&#xD;&#xA;WITH SCHEMABINDING, RETURNS NULL ON NULL INPUT, INLINE = ON&#xD;&#xA;AS" />
+						</Annotation>
+					</Element>
+				</Entry>
+			</Relationship>
+			<Relationship Name="Parameters">
+				<Entry>
+					<Element Type="SqlSubroutineParameter" Name="[smash].[SystemDatabaseType].[@DatabaseId]">
+						<Relationship Name="Type">
+							<Entry>
+								<Element Type="SqlTypeSpecifier">
+									<Relationship Name="Type">
+										<Entry>
+											<References ExternalSource="BuiltIns" Name="[int]" />
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+			</Relationship>
+			<Relationship Name="Schema">
+				<Entry>
+					<References Name="[smash]" />
+				</Entry>
+			</Relationship>
+			<Relationship Name="Type">
+				<Entry>
+					<Element Type="SqlTypeSpecifier">
+						<Property Name="Length" Value="8" />
+						<Relationship Name="Type">
+							<Entry>
+								<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+			</Relationship>
+		</Element>
+	</Model>
+</DataSchemaModel>

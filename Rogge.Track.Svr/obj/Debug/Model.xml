@@ -1,0 +1,4345 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DataSchemaModel FileFormatVersion="1.2" SchemaVersion="3.3" DspName="Microsoft.Data.Tools.Schema.Sql.Sql150DatabaseSchemaProvider" CollationLcid="1033" CollationCaseSensitive="False" xmlns="http://schemas.microsoft.com/sqlserver/dac/Serialization/2012/02">
+	<Header>
+		<CustomData Category="AnsiNulls">
+			<Metadata Name="AnsiNulls" Value="True" />
+		</CustomData>
+		<CustomData Category="QuotedIdentifier">
+			<Metadata Name="QuotedIdentifier" Value="True" />
+		</CustomData>
+		<CustomData Category="CompatibilityMode">
+			<Metadata Name="CompatibilityMode" Value="150" />
+		</CustomData>
+		<CustomData Category="Reference" Type="SqlSchema">
+			<Metadata Name="FileName" Value="C:\PROGRAM FILES\MICROSOFT VISUAL STUDIO\2022\COMMUNITY\COMMON7\IDE\EXTENSIONS\MICROSOFT\SQLDB\EXTENSIONS\SQLSERVER\150\SQLSCHEMAS\MASTER.DACPAC" />
+			<Metadata Name="LogicalName" Value="master.dacpac" />
+			<Metadata Name="ExternalParts" Value="[master]" />
+			<Metadata Name="SuppressMissingDependenciesErrors" Value="False" />
+		</CustomData>
+		<CustomData Category="Reference" Type="SqlSchema">
+			<Metadata Name="FileName" Value="C:\PROGRAM FILES\MICROSOFT VISUAL STUDIO\2022\COMMUNITY\COMMON7\IDE\EXTENSIONS\MICROSOFT\SQLDB\EXTENSIONS\SQLSERVER\150\SQLSCHEMAS\MSDB.DACPAC" />
+			<Metadata Name="LogicalName" Value="msdb.dacpac" />
+			<Metadata Name="ExternalParts" Value="[msdb]" />
+			<Metadata Name="SuppressMissingDependenciesErrors" Value="False" />
+		</CustomData>
+		<CustomData Category="Reference" Type="SqlSchema">
+			<Metadata Name="FileName" Value="D:\PROJECTS GITHUB\SMASH\ROGGE.TRACK.DBS\BIN\DEBUG\ROGGE.TRACK.DBS.DACPAC" />
+			<Metadata Name="LogicalName" Value="Rogge.Track.Dbs.dacpac" />
+			<Metadata Name="SuppressMissingDependenciesErrors" Value="False" />
+		</CustomData>
+		<CustomData Category="Reference" Type="Assembly">
+			<Metadata Name="LogicalName" Value="Rogge.Track.Svr.dll" />
+			<Metadata Name="FileName" Value="D:\PROJECTS GITHUB\SMASH\ROGGE.TRACK.SVR\OBJ\DEBUG\ROGGE.TRACK.SVR.DLL" />
+			<Metadata Name="AssemblyName" Value="Rogge.Track.Svr" />
+			<Metadata Name="PermissionSet" Value="SAFE" />
+			<Metadata Name="Owner" Value="" />
+			<Metadata Name="GenerateSqlClrDdl" Value="True" />
+			<Metadata Name="IsVisible" Value="True" />
+			<Metadata Name="IsModelAware" Value="True" />
+			<Metadata Name="SkipCreationIfEmpty" Value="True" />
+			<Metadata Name="AssemblySymbolsName" Value="D:\Projects GitHub\Smash\Rogge.Track.Svr\obj\Debug\Rogge.Track.Svr.pdb" />
+		</CustomData>
+		<CustomData Category="SqlCmdVariables" Type="SqlCmdVariable">
+			<Metadata Name="SSISDB" Value="" />
+		</CustomData>
+	</Header>
+	<Model>
+		<Element Type="SqlDatabaseOptions">
+			<Property Name="Collation" Value="SQL_Latin1_General_CP1_CI_AS" />
+			<Property Name="IsAnsiNullDefaultOn" Value="True" />
+			<Property Name="IsAnsiNullsOn" Value="True" />
+			<Property Name="IsAnsiWarningsOn" Value="True" />
+			<Property Name="IsArithAbortOn" Value="True" />
+			<Property Name="IsConcatNullYieldsNullOn" Value="True" />
+			<Property Name="IsTornPageProtectionOn" Value="False" />
+			<Property Name="RecoveryMode" Value="1" />
+			<Property Name="IsFullTextEnabled" Value="True" />
+			<Property Name="ParameterizationOption" Value="2" />
+			<Property Name="IsAllowSnapshotIsolation" Value="True" />
+			<Property Name="IsReadCommittedSnapshot" Value="True" />
+			<Property Name="DefaultLanguage" Value="" />
+			<Property Name="DefaultFullTextLanguage" Value="" />
+			<Property Name="QueryStoreStaleQueryThreshold" Value="367" />
+			<Property Name="LegacyCardinalityEstimation" Value="True" />
+			<Property Name="ParameterSniffing" Value="False" />
+			<Property Name="ParameterSniffingForSecondary" Value="False" />
+			<Property Name="QueryOptimizerHotfixes" Value="True" />
+			<Relationship Name="DefaultFilegroup">
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[PRIMARY]" />
+				</Entry>
+			</Relationship>
+		</Element>
+		<Element Type="SqlProcedure" Name="[track].[ProcProcedureLogOrphan]">
+			<Property Name="BodyScript">
+				<Value><![CDATA[
+BEGIN
+
+	SET NOCOUNT ON;
+	SET LOCK_TIMEOUT 100;
+	SET DEADLOCK_PRIORITY HIGH;
+
+	DECLARE @TxnCount		INT				= @@TRANCOUNT;
+	DECLARE @TxnActive		VARCHAR(32)		= REPLACE(CONVERT(VARCHAR(36), NEWID(), 0), '-', '');
+	DECLARE @ErrorCode		INT				= 0;
+
+	DECLARE @TrackingLogId	INT;
+	EXECUTE @TrackingLogId	= [track].[Insert_ProcedureLogBegin] @@PROCID;
+
+	IF (@TxnCount = 0) BEGIN TRANSACTION @TxnActive ELSE SAVE TRANSACTION @TxnActive;
+	BEGIN TRY
+	-----------------------------------------------------------------------------------------------
+
+--	Body goes here
+
+	-----------------------------------------------------------------------------------------------
+	IF (@TxnCount = 0) COMMIT TRANSACTION @TxnActive ELSE SAVE TRANSACTION @TxnActive;
+	END TRY
+	BEGIN CATCH
+
+		SET @ErrorCode = @@ERROR;
+
+		IF (XACT_STATE() = -1) ROLLBACK	TRANSACTION	@TxnActive;
+		IF (XACT_STATE() =  1) COMMIT	TRANSACTION	@TxnActive;
+
+		EXECUTE [track].[Insert_ProcedureLogError] @TrackingLogId;
+
+		THROW;
+
+		RETURN @ErrorCode;
+
+	END CATCH;
+
+	EXECUTE [track].[Insert_ProcedureLogEnd] @TrackingLogId;
+
+	RETURN @ErrorCode;
+
+END;]]></Value>
+			</Property>
+			<Property Name="IsAnsiNullsOn" Value="True" />
+			<Relationship Name="BodyDependencies">
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[int]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[varchar]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[varchar]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[int]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[int]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="Rogge.Track.Dbs.dacpac" Name="[track].[Insert_ProcedureLogBegin]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="Rogge.Track.Dbs.dacpac" Name="[track].[Insert_ProcedureLogError]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="Rogge.Track.Dbs.dacpac" Name="[track].[Insert_ProcedureLogEnd]" />
+				</Entry>
+			</Relationship>
+			<Relationship Name="Schema">
+				<Entry>
+					<References ExternalSource="Rogge.Track.Dbs.dacpac" Name="[track]" />
+				</Entry>
+			</Relationship>
+			<Annotation Type="SysCommentsObjectAnnotation">
+				<Property Name="Length" Value="1188" />
+				<Property Name="StartLine" Value="1" />
+				<Property Name="StartColumn" Value="1" />
+				<Property Name="HeaderContents" Value="CREATE PROCEDURE [track].[ProcProcedureLogOrphan]&#xD;&#xA;AS" />
+			</Annotation>
+		</Element>
+		<Element Type="SqlProcedure" Name="[track].[Select_ApplicationLog]">
+			<Property Name="BodyScript">
+				<Value><![CDATA[
+BEGIN
+
+	SET NOCOUNT ON;
+	SET LOCK_TIMEOUT 100;
+	SET DEADLOCK_PRIORITY HIGH;
+
+	DECLARE @TxnCount		INT				= @@TRANCOUNT;
+	DECLARE @TxnActive		VARCHAR(32)		= REPLACE(CONVERT(VARCHAR(36), NEWID(), 0), '-', '');
+	DECLARE @ErrorCode		INT				= 0;
+
+	IF (@TxnCount = 0) BEGIN TRANSACTION @TxnActive ELSE SAVE TRANSACTION @TxnActive;
+	BEGIN TRY
+	-----------------------------------------------------------------------------------------------
+
+		DROP TABLE IF EXISTS #ReturnTable_ApplicationLog;
+
+		CREATE TABLE #ReturnTable_ApplicationLog
+		(
+			[ReturnTableId]					INT					NOT	NULL	IDENTITY(1, 1)	NOT FOR REPLICATION,
+			[ApplicationLogId]				INT					NOT	NULL,
+
+			[DatabaseId]					SMALLINT			NOT	NULL,
+			[DatabaseName]					NVARCHAR(128)		NOT	NULL,
+
+			[ClassName]						VARCHAR(128)		NOT	NULL,
+			[FunctionName]					VARCHAR(128)		NOT	NULL,
+
+			[ApplicationVersion]			VARCHAR(128)		NOT	NULL,
+			[ApplicationPlatform]			VARCHAR(128)		NOT	NULL,
+
+			[ApplicationUserOriginal]		NVARCHAR(128)		NOT	NULL,
+			[ApplicationUserExecute]		NVARCHAR(128)		NOT	NULL,
+			[ApplicationHost]				NVARCHAR(128)		NOT	NULL,
+			[ApplicationApp]				NVARCHAR(128)		NOT	NULL,
+
+			[ApplicationBegin]				DATETIMEOFFSET(7)	NOT	NULL,
+			[ApplicationEnd]				DATETIMEOFFSET(7)		NULL,
+			[ApplicationError]				DATETIMEOFFSET(7)		NULL,
+			[ApplicationTerminate]			DATETIMEOFFSET(7)		NULL,
+
+			[Duration]						VARCHAR(20)				NULL,
+
+			[DurationDays]					FLOAT					NULL,
+			[DurationMinutes]				FLOAT					NULL,
+			[DurationSeconds]				FLOAT					NULL,
+
+			[ErrorMessage]					NVARCHAR(MAX)			NULL,
+
+			CONSTRAINT	[PK_#ReturnTable_ApplicationLog]	PRIMARY KEY CLUSTERED([ReturnTableId]	ASC)
+		);
+
+		DECLARE	@SqlBase		NVARCHAR(MAX)	= N'
+		IF (OBJECT_ID(''[$(DatabaseName)].[track].[ApplicationLog]'') IS NOT NULL)
+		BEGIN
+
+			INSERT INTO #ReturnTable_ApplicationLog	WITH(TABLOCK)
+			(
+				[ApplicationLogId],
+
+				[DatabaseId],
+				[DatabaseName],
+
+				[ClassName],
+				[FunctionName],
+
+				[ApplicationVersion],
+				[ApplicationPlatform],
+
+				[ApplicationUserOriginal],
+				[ApplicationUserExecute],
+				[ApplicationHost],
+				[ApplicationApp],
+
+				[ApplicationBegin],
+				[ApplicationEnd],
+				[ApplicationError],
+				[ApplicationTerminate],
+
+				[Duration],
+
+				[DurationDays],
+				[DurationMinutes],
+				[DurationSeconds],
+
+				[ErrorMessage]
+			)
+			SELECT
+				[t].[ApplicationLogId],
+
+				[t].[DatabaseId],
+				[t].[DatabaseName],
+
+				[t].[ClassName],
+				[t].[FunctionName],
+
+				[t].[ApplicationVersion],
+				[t].[ApplicationPlatform],
+
+				[t].[ApplicationUserOriginal],
+				[t].[ApplicationUserExecute],
+				[t].[ApplicationHost],
+				[t].[ApplicationApp],
+
+				[t].[ApplicationBegin],
+				[t].[ApplicationEnd],
+				[t].[ApplicationError],
+				[t].[ApplicationTerminate],
+
+				[t].[Duration],
+
+				[t].[DurationDays],
+				[t].[DurationMinutes],
+				[t].[DurationSeconds],
+
+				[t].[ErrorMessage]
+			FROM
+				[$(DatabaseName)].[track].[ApplicationLog]	[t];
+
+		END;';
+
+		DECLARE @DbName			NVARCHAR(128)	= N'';
+		DECLARE @SqlCommand		NVARCHAR(MAX);
+
+		WHILE (@DbName IS NOT NULL)
+		BEGIN
+
+			SELECT
+				@DbName = MIN([d].[name])
+			FROM
+				sys.databases	[d]
+			WHERE
+					([d].[database_id] > 4)
+				AND	([d].[name] NOT IN (N'master', N'model', N'msdb', N'tempdb', N'DWConfiguration', N'DWDiagnostics', N'DWQueue', N'SSISDB', N'SSRS', N'SSRSTempDB'))
+				AND	([d].[name]	> @DbName);
+
+			SET @SqlCommand = REPLACE(@SqlBase, N'$(DatabaseName)', @DbName);
+
+			PRINT CONVERT(NCHAR(23), SYSDATETIME(), 121) + NCHAR(9) + N'Querying database [' + @DbName + N']';
+
+			EXECUTE sp_executesql @SqlCommand;
+
+		END;
+
+		SELECT
+			[t].[ReturnTableId],
+			[t].[ApplicationLogId],
+
+			[t].[DatabaseId],
+			[t].[DatabaseName],
+
+			[t].[ClassName],
+			[t].[FunctionName],
+
+			[t].[ApplicationVersion],
+			[t].[ApplicationPlatform],
+
+			[t].[ApplicationUserOriginal],
+			[t].[ApplicationUserExecute],
+			[t].[ApplicationHost],
+			[t].[ApplicationApp],
+
+				[TimezoneOffsetHours]	= DATEPART(TZ, [t].[ApplicationBegin]) / 60.0,
+
+				[ApplicationBegin]		= CONVERT(DATETIME2, [t].[ApplicationBegin]),
+				[ApplicationEnd]		= CONVERT(DATETIME2, [t].[ApplicationEnd]),
+				[ApplicationError]		= CONVERT(DATETIME2, [t].[ApplicationError]),
+				[ApplicationTerminate]	= CONVERT(DATETIME2, [t].[ApplicationTerminate]),
+
+			[t].[Duration],
+
+			[t].[DurationDays],
+			[t].[DurationMinutes],
+			[t].[DurationSeconds],
+
+			[t].[ErrorMessage]
+		FROM
+			#ReturnTable_ApplicationLog	[t];
+
+		DROP TABLE IF EXISTS #ReturnTable_ApplicationLog;
+
+	-----------------------------------------------------------------------------------------------
+	IF (@TxnCount = 0) COMMIT TRANSACTION @TxnActive ELSE SAVE TRANSACTION @TxnActive;
+	END TRY
+	BEGIN CATCH
+
+		SET @ErrorCode = @@ERROR;
+
+		IF (XACT_STATE() = -1) ROLLBACK	TRANSACTION	@TxnActive;
+		IF (XACT_STATE() =  1) COMMIT	TRANSACTION	@TxnActive;
+
+		THROW;
+
+		RETURN @ErrorCode;
+
+	END CATCH;
+
+	RETURN @ErrorCode;
+
+END;]]></Value>
+			</Property>
+			<Property Name="IsAnsiNullsOn" Value="True" />
+			<Relationship Name="BodyDependencies">
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[int]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[varchar]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[varchar]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[int]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[databases]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[databases].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[databases].[database_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[nchar]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[sp_executesql]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ReturnTableId]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ApplicationLogId]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[DatabaseId]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[DatabaseName]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ClassName]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[FunctionName]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ApplicationVersion]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ApplicationPlatform]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ApplicationUserOriginal]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ApplicationUserExecute]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ApplicationHost]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ApplicationApp]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ApplicationBegin]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[datetime2]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[datetime2]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ApplicationEnd]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[datetime2]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ApplicationError]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[datetime2]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ApplicationTerminate]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[Duration]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[DurationDays]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[DurationMinutes]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[DurationSeconds]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ErrorMessage]" />
+				</Entry>
+			</Relationship>
+			<Relationship Name="DynamicObjects">
+				<Entry>
+					<Element Type="SqlDynamicColumnSource" Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog]">
+						<Relationship Name="Columns">
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ReturnTableId]">
+									<Property Name="IsNullable" Value="False" />
+									<Property Name="IsIdentity" Value="True" />
+									<Property Name="IdentityIsNotForReplication" Value="True" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[int]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ApplicationLogId]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[int]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[DatabaseId]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[smallint]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[DatabaseName]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="128" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ClassName]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="128" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[varchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[FunctionName]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="128" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[varchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ApplicationVersion]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="128" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[varchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ApplicationPlatform]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="128" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[varchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ApplicationUserOriginal]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="128" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ApplicationUserExecute]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="128" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ApplicationHost]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="128" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ApplicationApp]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="128" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ApplicationBegin]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Scale" Value="7" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[datetimeoffset]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ApplicationEnd]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Scale" Value="7" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[datetimeoffset]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ApplicationError]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Scale" Value="7" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[datetimeoffset]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ApplicationTerminate]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Scale" Value="7" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[datetimeoffset]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[Duration]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="20" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[varchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[DurationDays]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Precision" Value="53" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[float]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[DurationMinutes]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Precision" Value="53" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[float]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[DurationSeconds]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Precision" Value="53" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[float]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ApplicationLog].[#ReturnTable_ApplicationLog].[ErrorMessage]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="IsMax" Value="True" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+			</Relationship>
+			<Relationship Name="Schema">
+				<Entry>
+					<References ExternalSource="Rogge.Track.Dbs.dacpac" Name="[track]" />
+				</Entry>
+			</Relationship>
+			<Annotation Type="SysCommentsObjectAnnotation">
+				<Property Name="Length" Value="5138" />
+				<Property Name="StartLine" Value="1" />
+				<Property Name="StartColumn" Value="1" />
+				<Property Name="HeaderContents" Value="CREATE PROCEDURE [track].[Select_ApplicationLog]&#xD;&#xA;AS" />
+			</Annotation>
+		</Element>
+		<Element Type="SqlProcedure" Name="[track].[Select_BatchLog]">
+			<Property Name="BodyScript">
+				<Value><![CDATA[
+BEGIN
+
+	SET NOCOUNT ON;
+	SET LOCK_TIMEOUT 100;
+	SET DEADLOCK_PRIORITY HIGH;
+
+	DECLARE @TxnCount		INT				= @@TRANCOUNT;
+	DECLARE @TxnActive		VARCHAR(32)		= REPLACE(CONVERT(VARCHAR(36), NEWID(), 0), '-', '');
+	DECLARE @ErrorCode		INT				= 0;
+
+	IF (@TxnCount = 0) BEGIN TRANSACTION @TxnActive ELSE SAVE TRANSACTION @TxnActive;
+	BEGIN TRY
+	-----------------------------------------------------------------------------------------------
+
+		DROP TABLE IF EXISTS #ReturnTable_BatchLog;
+
+		CREATE TABLE #ReturnTable_BatchLog
+		(
+			[ReturnTableId]					INT					NOT	NULL	IDENTITY(1, 1)	NOT FOR REPLICATION,
+			[BatchLogId]					INT					NOT	NULL,
+
+			[DatabaseId]					SMALLINT			NOT	NULL,
+
+			[DatabaseName]					NVARCHAR(128)		NOT	NULL,
+			[SchemaName]					NVARCHAR(128)		NOT	NULL,
+			[TableName]						NVARCHAR(128)		NOT	NULL,
+			[SourceData]					NVARCHAR(128)		NOT	NULL,
+
+			[ApplicationUserOriginal]		NVARCHAR(128)		NOT	NULL,
+			[ApplicationUserExecute]		NVARCHAR(128)		NOT	NULL,
+			[ApplicationHost]				NVARCHAR(128)		NOT	NULL,
+			[ApplicationApp]				NVARCHAR(128)		NOT	NULL,
+
+			[RowCount]						INT						NULL,
+			[UpdateDateBeg]					DATETIMEOFFSET(7)		NULL,
+			[UpdateDateEnd]					DATETIMEOFFSET(7)		NULL,
+			[SourceNotes]					VARCHAR(MAX)			NULL,
+
+			[Duration]						VARCHAR(20)				NULL,
+
+			[DurationDays]					FLOAT					NULL,
+			[DurationMinutes]				FLOAT					NULL,
+			[DurationSeconds]				FLOAT					NULL,
+
+			CONSTRAINT	[PK_#ReturnTable_BatchLog]	PRIMARY KEY CLUSTERED([ReturnTableId]	ASC)
+		);
+
+		DECLARE	@SqlBase		VARCHAR(MAX)	= N'
+		IF (OBJECT_ID(''[$(DatabaseName)].[track].[BatchLog]'') IS NOT NULL)
+		BEGIN
+
+			INSERT INTO #ReturnTable_BatchLog	WITH(TABLOCK)
+			(
+				[BatchLogId],
+
+				[DatabaseId],
+
+				[DatabaseName],
+				[SchemaName],
+				[TableName],
+				[SourceData],
+
+				[ApplicationUserOriginal],
+				[ApplicationUserExecute],
+				[ApplicationHost],
+				[ApplicationApp],
+
+				[RowCount],
+				[UpdateDateBeg],
+				[UpdateDateEnd],
+				[SourceNotes],
+
+				[Duration],
+
+				[DurationDays],
+				[DurationMinutes],
+				[DurationSeconds]
+			)
+			SELECT
+				[t].[BatchLogId],
+
+				[t].[DatabaseId],
+
+				[t].[DatabaseName],
+				[t].[SchemaName],
+				[t].[TableName],
+				[t].[SourceData],
+
+				[t].[ApplicationUserOriginal],
+				[t].[ApplicationUserExecute],
+				[t].[ApplicationHost],
+				[t].[ApplicationApp],
+
+				[t].[RowCount],
+				[t].[UpdateDateBeg],
+				[t].[UpdateDateEnd],
+				[t].[SourceNotes],
+
+				[t].[Duration],
+
+				[t].[DurationDays],
+				[t].[DurationMinutes],
+				[t].[DurationSeconds]
+			FROM
+				[$(DatabaseName)].[track].[BatchLog]	[t];
+
+		END;';
+
+		DECLARE @DbName			NVARCHAR(128)	= N'';
+		DECLARE @SqlCommand		NVARCHAR(MAX);
+
+		WHILE (@DbName IS NOT NULL)
+		BEGIN
+
+			SELECT
+				@DbName = MIN([d].[name])
+			FROM
+				sys.databases	[d]
+			WHERE
+					([d].[database_id] > 4)
+				AND	([d].[name] NOT IN (N'master', N'model', N'msdb', N'tempdb', N'DWConfiguration', N'DWDiagnostics', N'DWQueue', N'SSISDB', N'SSRS', N'SSRSTempDB'))
+				AND	([d].[name]	> @DbName);
+
+			SET @SqlCommand = REPLACE(@SqlBase, N'$(DatabaseName)', @DbName);
+
+			PRINT CONVERT(NCHAR(23), SYSDATETIME(), 121) + NCHAR(9) + N'Querying database [' + @DbName + N']';
+
+			EXECUTE sp_executesql @SqlCommand;
+
+		END;
+
+		SELECT
+			[t].[ReturnTableId],
+			[t].[BatchLogId],
+
+			[t].[DatabaseId],
+			[t].[DatabaseName],
+			[t].[SchemaName],
+			[t].[TableName],
+			[t].[SourceData],
+
+			[t].[ApplicationUserOriginal],
+			[t].[ApplicationUserExecute],
+			[t].[ApplicationHost],
+			[t].[ApplicationApp],
+
+			[t].[RowCount],
+
+				[TimezoneOffsetHours]	= DATEPART(TZ, [t].[UpdateDateBeg]) / 60.0,
+
+				[UpdateDateBeg]			= CONVERT(DATETIME2, [t].[UpdateDateBeg]),
+				[UpdateDateEnd]			= CONVERT(DATETIME2, [t].[UpdateDateEnd]),
+
+			[t].[SourceNotes],
+
+			[t].[Duration],
+
+			[t].[DurationDays],
+			[t].[DurationMinutes],
+			[t].[DurationSeconds]
+		FROM
+			#ReturnTable_BatchLog	[t];
+
+		DROP TABLE IF EXISTS #ReturnTable_BatchLog;
+
+	-----------------------------------------------------------------------------------------------
+	IF (@TxnCount = 0) COMMIT TRANSACTION @TxnActive ELSE SAVE TRANSACTION @TxnActive;
+	END TRY
+	BEGIN CATCH
+
+		SET @ErrorCode = @@ERROR;
+
+		IF (XACT_STATE() = -1) ROLLBACK	TRANSACTION	@TxnActive;
+		IF (XACT_STATE() =  1) COMMIT	TRANSACTION	@TxnActive;
+
+		THROW;
+
+		RETURN @ErrorCode;
+
+	END CATCH;
+
+	RETURN @ErrorCode;
+
+END;]]></Value>
+			</Property>
+			<Property Name="IsAnsiNullsOn" Value="True" />
+			<Relationship Name="BodyDependencies">
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[int]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[varchar]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[varchar]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[int]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[varchar]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[databases]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[databases].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[databases].[database_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[nchar]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[sp_executesql]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[ReturnTableId]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[BatchLogId]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[DatabaseId]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[DatabaseName]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[SchemaName]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[TableName]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[SourceData]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[ApplicationUserOriginal]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[ApplicationUserExecute]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[ApplicationHost]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[ApplicationApp]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[RowCount]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[UpdateDateBeg]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[datetime2]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[datetime2]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[UpdateDateEnd]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[SourceNotes]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[Duration]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[DurationDays]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[DurationMinutes]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[DurationSeconds]" />
+				</Entry>
+			</Relationship>
+			<Relationship Name="DynamicObjects">
+				<Entry>
+					<Element Type="SqlDynamicColumnSource" Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog]">
+						<Relationship Name="Columns">
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[ReturnTableId]">
+									<Property Name="IsNullable" Value="False" />
+									<Property Name="IsIdentity" Value="True" />
+									<Property Name="IdentityIsNotForReplication" Value="True" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[int]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[BatchLogId]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[int]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[DatabaseId]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[smallint]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[DatabaseName]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="128" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[SchemaName]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="128" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[TableName]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="128" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[SourceData]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="128" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[ApplicationUserOriginal]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="128" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[ApplicationUserExecute]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="128" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[ApplicationHost]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="128" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[ApplicationApp]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="128" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[RowCount]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[int]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[UpdateDateBeg]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Scale" Value="7" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[datetimeoffset]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[UpdateDateEnd]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Scale" Value="7" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[datetimeoffset]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[SourceNotes]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="IsMax" Value="True" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[varchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[Duration]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="20" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[varchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[DurationDays]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Precision" Value="53" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[float]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[DurationMinutes]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Precision" Value="53" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[float]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_BatchLog].[#ReturnTable_BatchLog].[DurationSeconds]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Precision" Value="53" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[float]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+			</Relationship>
+			<Relationship Name="Schema">
+				<Entry>
+					<References ExternalSource="Rogge.Track.Dbs.dacpac" Name="[track]" />
+				</Entry>
+			</Relationship>
+			<Annotation Type="SysCommentsObjectAnnotation">
+				<Property Name="Length" Value="4564" />
+				<Property Name="StartLine" Value="1" />
+				<Property Name="StartColumn" Value="1" />
+				<Property Name="HeaderContents" Value="CREATE PROCEDURE [track].[Select_BatchLog]&#xD;&#xA;AS" />
+			</Annotation>
+		</Element>
+		<Element Type="SqlProcedure" Name="[track].[Select_ProcedureLog]">
+			<Property Name="BodyScript">
+				<Value><![CDATA[
+BEGIN
+
+	SET NOCOUNT ON;
+	SET LOCK_TIMEOUT 100;
+	SET DEADLOCK_PRIORITY HIGH;
+
+	DECLARE @TxnCount		INT				= @@TRANCOUNT;
+	DECLARE @TxnActive		VARCHAR(32)		= REPLACE(CONVERT(VARCHAR(36), NEWID(), 0), '-', '');
+	DECLARE @ErrorCode		INT				= 0;
+
+	IF (@TxnCount = 0) BEGIN TRANSACTION @TxnActive ELSE SAVE TRANSACTION @TxnActive;
+	BEGIN TRY
+	-----------------------------------------------------------------------------------------------
+
+		DROP TABLE IF EXISTS #ReturnTable_ProcedureLog;
+
+		CREATE TABLE #ReturnTable_ProcedureLog
+		(
+			[ReturnTableId]					INT					NOT	NULL	IDENTITY(1, 1) NOT FOR REPLICATION,
+
+			[ProcedureLogId]				INT					NOT	NULL,
+
+			[database_id]					SMALLINT			NOT	NULL,
+			[schema_id]						INT					NOT	NULL,
+			[object_id]						INT					NOT	NULL,
+
+			[ServerName]					NVARCHAR(128)		NOT	NULL,
+			[DatabaseName]					NVARCHAR(128)		NOT	NULL,
+			[SchemaName]					NVARCHAR(128)		NOT	NULL,
+			[ObjectName]					NVARCHAR(128)		NOT	NULL,
+			[QualifiedName]					NVARCHAR(261)		NOT	NULL,
+
+			[SPID]							SMALLINT			NOT	NULL,
+			[NestLevel]						INT					NOT	NULL,
+			[TransactionCount]				INT					NOT	NULL,
+
+			[ProcedureUserOriginal]			NVARCHAR(128)		NOT	NULL,
+			[ProcedureUserExecute]			NVARCHAR(128)		NOT	NULL,
+			[ProcedureHost]					NVARCHAR(128)		NOT	NULL,
+			[ProcedureApplication]			NVARCHAR(128)		NOT	NULL,
+
+			[ProcedureStatus]				VARCHAR(24)			NOT	NULL,
+
+			[ProcedureBegin]				DATETIME2			NOT	NULL,
+			[ProcedureBeginDate]			DATE				NOT	NULL,
+			[ProcedureBeginTime]			TIME				NOT	NULL,
+			[ProcedureBeginZone]			DATETIMEOFFSET(7)	NOT	NULL,
+
+			[ProcedureEnd]					DATETIME2				NULL,
+			[ProcedureEndDate]				DATE					NULL,
+			[ProcedureEndTime]				TIME					NULL,
+			[ProcedureEndZone]				DATETIMEOFFSET(7)		NULL,
+
+			[ProcedureError]				DATETIME2				NULL,
+			[ProcedureErrorDate]			DATE					NULL,
+			[ProcedureErrorTime]			TIME					NULL,
+			[ProcedureErrorZone]			DATETIMEOFFSET(7)		NULL,
+
+			[ProcedureOrphaned]				DATETIME2				NULL,
+			[ProcedureOrphanedDate]			DATE					NULL,
+			[ProcedureOrphanedTime]			TIME					NULL,
+			[ProcedureOrphanedZone]			DATETIMEOFFSET(7)		NULL,
+
+			[Duration]						VARCHAR(20)				NULL,
+
+			[DurationDays]					FLOAT					NULL,
+			[DurationMinutes]				FLOAT					NULL,
+			[DurationSeconds]				FLOAT					NULL,
+
+			[ErrorNumber]					INT						NULL,
+			[ErrorSeverity]					INT						NULL,
+			[ErrorState]					INT						NULL,
+			[ErrorProcedure]				NVARCHAR(128)			NULL,
+			[ErrorLine]						INT						NULL,
+			[ErrorMessage]					NVARCHAR(MAX)			NULL,
+
+			[IsWrapper]						BIT						NULL,
+			[IsDelete]						BIT						NULL,
+
+			PRIMARY KEY CLUSTERED([ReturnTableId]	ASC)
+		);
+
+		DECLARE	@SqlBase		NVARCHAR(MAX)	= N'
+		IF (OBJECT_ID(''[$(DatabaseName)].[track].[ProcedureLog]'') IS NOT NULL)
+		BEGIN
+
+			INSERT INTO #ReturnTable_ProcedureLog	WITH(TABLOCK)
+			(
+				[ProcedureLogId],
+
+				[database_id],
+				[schema_id],
+				[object_id],
+
+				[ServerName],
+				[DatabaseName],
+				[SchemaName],
+				[ObjectName],
+				[QualifiedName],
+
+				[SPID],
+				[NestLevel],
+				[TransactionCount],
+
+				[ProcedureUserOriginal],
+				[ProcedureUserExecute],
+				[ProcedureHost],
+				[ProcedureApplication],
+
+				[ProcedureStatus],
+
+				[ProcedureBegin],
+				[ProcedureBeginDate],
+				[ProcedureBeginTime],
+				[ProcedureBeginZone],
+
+				[ProcedureEnd],
+				[ProcedureEndDate],
+				[ProcedureEndTime],
+				[ProcedureEndZone],
+
+				[ProcedureError],
+				[ProcedureErrorDate],
+				[ProcedureErrorTime],
+				[ProcedureErrorZone],
+
+				[ProcedureOrphaned],
+				[ProcedureOrphanedDate],
+				[ProcedureOrphanedTime],
+				[ProcedureOrphanedZone],
+
+				[Duration],
+
+				[DurationDays],
+				[DurationMinutes],
+				[DurationSeconds],
+
+				[ErrorNumber],
+				[ErrorSeverity],
+				[ErrorState],
+				[ErrorProcedure],
+				[ErrorLine],
+				[ErrorMessage],
+
+				[IsWrapper],
+				[IsDelete]
+			)
+			SELECT
+				[t].[ProcedureLogId],
+
+				[t].[database_id],
+				[t].[schema_id],
+				[t].[object_id],
+
+				[t].[ServerName],
+				[t].[DatabaseName],
+				[t].[SchemaName],
+				[t].[ObjectName],
+				[t].[QualifiedName],
+
+				[t].[SPID],
+				[t].[NestLevel],
+				[t].[TransactionCount],
+
+				[t].[ProcedureUserOriginal],
+				[t].[ProcedureUserExecute],
+				[t].[ProcedureHost],
+				[t].[ProcedureApplication],
+
+				[t].[ProcedureStatus],
+
+				[t].[ProcedureBegin],
+				[t].[ProcedureBeginDate],
+				[t].[ProcedureBeginTime],
+				[t].[ProcedureBeginZone],
+
+				[t].[ProcedureEnd],
+				[t].[ProcedureEndDate],
+				[t].[ProcedureEndTime],
+				[t].[ProcedureEndZone],
+
+				[t].[ProcedureError],
+				[t].[ProcedureErrorDate],
+				[t].[ProcedureErrorTime],
+				[t].[ProcedureErrorZone],
+
+				[t].[ProcedureOrphaned],
+				[t].[ProcedureOrphanedDate],
+				[t].[ProcedureOrphanedTime],
+				[t].[ProcedureOrphanedZone],
+
+				[t].[Duration],
+
+				[t].[DurationDays],
+				[t].[DurationMinutes],
+				[t].[DurationSeconds],
+
+				[t].[ErrorNumber],
+				[t].[ErrorSeverity],
+				[t].[ErrorState],
+				[t].[ErrorProcedure],
+				[t].[ErrorLine],
+				[t].[ErrorMessage],
+
+				[t].[IsWrapper],
+				[t].[IsDelete]
+			FROM
+				[$(DatabaseName)].[track].[ProcedureLog]	[t];
+
+		END;';
+
+		DECLARE @DbName			NVARCHAR(128)	= N'';
+		DECLARE @SqlCommand		NVARCHAR(MAX);
+
+		WHILE (@DbName IS NOT NULL)
+		BEGIN
+
+			SELECT
+				@DbName = MIN([d].[name])
+			FROM
+				sys.databases	[d]
+			WHERE
+					([d].[database_id] > 4)
+				AND	([d].[name] NOT IN (N'master', N'model', N'msdb', N'tempdb', N'DWConfiguration', N'DWDiagnostics', N'DWQueue', N'SSISDB', N'SSRS', N'SSRSTempDB'))
+				AND	([d].[name]	> @DbName);
+
+			SET @SqlCommand = REPLACE(@SqlBase, N'$(DatabaseName)', @DbName);
+
+			PRINT CONVERT(NCHAR(23), SYSDATETIME(), 121) + NCHAR(9) + N'Querying database [' + @DbName + N']';
+
+			EXECUTE sp_executesql @SqlCommand;
+
+		END;
+
+		SELECT
+			[t].[ProcedureLogId],
+
+			[t].[database_id],
+			[t].[schema_id],
+			[t].[object_id],
+
+			[t].[ServerName],
+			[t].[DatabaseName],
+			[t].[SchemaName],
+			[t].[ObjectName],
+			[t].[QualifiedName],
+
+			[t].[SPID],
+			[t].[NestLevel],
+			[t].[TransactionCount],
+
+			[t].[ProcedureUserOriginal],
+			[t].[ProcedureUserExecute],
+			[t].[ProcedureHost],
+			[t].[ProcedureApplication],
+
+			[t].[ProcedureStatus],
+
+			[t].[ProcedureBegin],
+			[t].[ProcedureBeginDate],
+			[t].[ProcedureBeginTime],
+			[t].[ProcedureBeginZone],
+
+			[t].[ProcedureEnd],
+			[t].[ProcedureEndDate],
+			[t].[ProcedureEndTime],
+			[t].[ProcedureEndZone],
+
+			[t].[ProcedureError],
+			[t].[ProcedureErrorDate],
+			[t].[ProcedureErrorTime],
+			[t].[ProcedureErrorZone],
+
+			[t].[ProcedureOrphaned],
+			[t].[ProcedureOrphanedDate],
+			[t].[ProcedureOrphanedTime],
+			[t].[ProcedureOrphanedZone],
+
+			[t].[Duration],
+
+			[t].[DurationDays],
+			[t].[DurationMinutes],
+			[t].[DurationSeconds],
+
+			[t].[ErrorNumber],
+			[t].[ErrorSeverity],
+			[t].[ErrorState],
+			[t].[ErrorProcedure],
+			[t].[ErrorLine],
+			[t].[ErrorMessage],
+
+			[t].[IsWrapper],
+			[t].[IsDelete]
+		FROM
+			#ReturnTable_ProcedureLog	[t] WITH (NOLOCK);
+
+		DROP TABLE IF EXISTS #ReturnTable_ProcedureLog;
+
+	-----------------------------------------------------------------------------------------------
+	IF (@TxnCount = 0) COMMIT TRANSACTION @TxnActive ELSE SAVE TRANSACTION @TxnActive;
+	END TRY
+	BEGIN CATCH
+
+		SET @ErrorCode = @@ERROR;
+
+		IF (XACT_STATE() = -1) ROLLBACK	TRANSACTION	@TxnActive;
+		IF (XACT_STATE() =  1) COMMIT	TRANSACTION	@TxnActive;
+
+		THROW;
+
+		RETURN @ErrorCode;
+
+	END CATCH;
+
+	RETURN @ErrorCode;
+
+END;]]></Value>
+			</Property>
+			<Property Name="IsAnsiNullsOn" Value="True" />
+			<Relationship Name="BodyDependencies">
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[int]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[varchar]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[varchar]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[int]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[databases]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[databases].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[databases].[database_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[nchar]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[sp_executesql]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureLogId]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[database_id]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[schema_id]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[object_id]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ServerName]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[DatabaseName]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[SchemaName]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ObjectName]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[QualifiedName]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[SPID]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[NestLevel]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[TransactionCount]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureUserOriginal]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureUserExecute]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureHost]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureApplication]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureStatus]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureBegin]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureBeginDate]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureBeginTime]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureBeginZone]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureEnd]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureEndDate]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureEndTime]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureEndZone]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureError]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureErrorDate]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureErrorTime]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureErrorZone]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureOrphaned]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureOrphanedDate]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureOrphanedTime]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureOrphanedZone]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[Duration]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[DurationDays]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[DurationMinutes]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[DurationSeconds]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ErrorNumber]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ErrorSeverity]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ErrorState]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ErrorProcedure]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ErrorLine]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ErrorMessage]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[IsWrapper]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[IsDelete]" />
+				</Entry>
+			</Relationship>
+			<Relationship Name="DynamicObjects">
+				<Entry>
+					<Element Type="SqlDynamicColumnSource" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog]">
+						<Relationship Name="Columns">
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ReturnTableId]">
+									<Property Name="IsNullable" Value="False" />
+									<Property Name="IsIdentity" Value="True" />
+									<Property Name="IdentityIsNotForReplication" Value="True" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[int]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureLogId]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[int]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[database_id]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[smallint]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[schema_id]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[int]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[object_id]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[int]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ServerName]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="128" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[DatabaseName]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="128" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[SchemaName]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="128" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ObjectName]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="128" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[QualifiedName]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="261" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[SPID]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[smallint]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[NestLevel]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[int]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[TransactionCount]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[int]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureUserOriginal]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="128" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureUserExecute]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="128" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureHost]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="128" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureApplication]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="128" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureStatus]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="24" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[varchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureBegin]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Scale" Value="7" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[datetime2]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureBeginDate]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[date]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureBeginTime]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Scale" Value="7" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[time]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureBeginZone]">
+									<Property Name="IsNullable" Value="False" />
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Scale" Value="7" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[datetimeoffset]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureEnd]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Scale" Value="7" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[datetime2]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureEndDate]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[date]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureEndTime]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Scale" Value="7" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[time]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureEndZone]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Scale" Value="7" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[datetimeoffset]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureError]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Scale" Value="7" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[datetime2]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureErrorDate]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[date]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureErrorTime]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Scale" Value="7" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[time]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureErrorZone]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Scale" Value="7" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[datetimeoffset]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureOrphaned]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Scale" Value="7" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[datetime2]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureOrphanedDate]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[date]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureOrphanedTime]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Scale" Value="7" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[time]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ProcedureOrphanedZone]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Scale" Value="7" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[datetimeoffset]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[Duration]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="20" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[varchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[DurationDays]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Precision" Value="53" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[float]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[DurationMinutes]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Precision" Value="53" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[float]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[DurationSeconds]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Precision" Value="53" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[float]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ErrorNumber]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[int]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ErrorSeverity]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[int]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ErrorState]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[int]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ErrorProcedure]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="Length" Value="128" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ErrorLine]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[int]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[ErrorMessage]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Property Name="IsMax" Value="True" />
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[nvarchar]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[IsWrapper]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[bit]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlSimpleColumn" Name="[track].[Select_ProcedureLog].[#ReturnTable_ProcedureLog].[IsDelete]">
+									<Relationship Name="TypeSpecifier">
+										<Entry>
+											<Element Type="SqlTypeSpecifier">
+												<Relationship Name="Type">
+													<Entry>
+														<References ExternalSource="BuiltIns" Name="[bit]" />
+													</Entry>
+												</Relationship>
+											</Element>
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+			</Relationship>
+			<Relationship Name="Schema">
+				<Entry>
+					<References ExternalSource="Rogge.Track.Dbs.dacpac" Name="[track]" />
+				</Entry>
+			</Relationship>
+			<Annotation Type="SysCommentsObjectAnnotation">
+				<Property Name="Length" Value="7734" />
+				<Property Name="StartLine" Value="1" />
+				<Property Name="StartColumn" Value="1" />
+				<Property Name="HeaderContents" Value="CREATE PROCEDURE [track].[Select_ProcedureLog]&#xD;&#xA;AS" />
+			</Annotation>
+		</Element>
+		<Element Type="SqlView" Name="[track].[SqlAgentHistory]">
+			<Property Name="IsMetadataReported" Value="True" />
+			<Property Name="QueryScript">
+				<Value><![CDATA[
+SELECT
+		[instance_id]			= CHECKSUM(@@SERVERNAME),
+
+		[Instance]				= @@SERVERNAME,
+		[InstanceHost]			= CAST(SERVERPROPERTY('MachineName') AS VARCHAR),
+		[InstanceName]			= @@SERVICENAME,
+
+	[t].[ServerName],
+	[t].[JobName],
+	[t].[StepMessage],
+		[RunStatus]				= CASE [t].[run_status]
+									WHEN 0	THEN 'Failed'
+									WHEN 1	THEN 'Succeeded'
+									WHEN 2	THEN 'Retry'
+									WHEN 3	THEN 'Canceled'
+									WHEN 4	THEN 'In Progress'
+									ELSE		 'Unknown'
+									END,
+	[t].[RetryCount],
+
+	[t].[JobBegin],
+	[t].[JobBeginDate],
+	[t].[JobBeginTime],
+
+		[JobEnd]				= DATEADD(SECOND, [t].[DurationSeconds], [t].[JobBegin]),
+		[JobEndDate]			= CONVERT(DATE, DATEADD(SECOND, [t].[DurationSeconds], [t].[JobBegin])),
+		[JobEndTime]			= DATEADD(SECOND, [t].[DurationSeconds], [t].[JobBeginTime]),
+
+		[DurationDays]			= [t].[DurationSeconds] / 86400.0,
+		[DurationMinutes]		= [t].[DurationSeconds] / 60.0,
+	[t].[DurationSeconds]
+FROM (
+	SELECT
+		[t].[ServerName],
+		[t].[JobName],
+		[t].[StepMessage],
+		[t].[run_status],
+		[t].[RetryCount],
+
+			[JobBegin]			= CONVERT(DATETIME, [t].[JobBeginDate]) + CONVERT(DATETIME, [t].[JobBeginTime]),
+		[t].[JobBeginDate],
+		[t].[JobBeginTime],
+
+			[DurationSeconds]	= CONVERT(INT, LEFT([t].[Duration], 2))				* 86400 +	--	Days
+									CONVERT(INT, SUBSTRING([t].[Duration], 4, 2))	* 3600 +	--	Hours
+									CONVERT(INT, SUBSTRING([t].[Duration], 7, 2))	* 60 +		--	Minutes
+									CONVERT(INT, RIGHT([t].[Duration], 2))						--	Seconds
+	FROM (
+		SELECT
+			[h].[run_status],
+
+				[ServerName]		= [v].[name],
+				[JobName]			= [j].[name],
+				[StepMessage]		= [h].[message],
+				[RetryCount]		= [h].[retries_attempted],
+				[JobBeginDate]		= CONVERT(DATE, CONVERT(CHAR(8), [h].[run_date]), 112),
+				[JobBeginTime]		= CONVERT(TIME, STUFF(STUFF(RIGHT(REPLICATE('0', 6) + CONVERT(VARCHAR(6), [h].[run_time]), 6), 5, 0, ':'), 3, 0, ':'), 120),
+				[Duration]			= STUFF(STUFF(STUFF(RIGHT(REPLICATE('0', 8) + CONVERT(VARCHAR(8), [h].[run_duration]), 8), 3, 0, ':'), 6, 0, ':'), 9, 0, ':')
+		FROM
+			[msdb].[dbo].[sysjobs]						[j]
+		INNER JOIN
+			[msdb].[sys].[servers]						[v]
+				ON	([j].[originating_server_id]	=	[v].[server_id])
+		INNER JOIN
+			[msdb].[dbo].[sysjobhistory]				[h]
+				ON	([j].[job_id]					=	[h].[job_id])
+		WHERE
+			([h].[step_id] = 0)
+		) [t]
+	) [t]]]></Value>
+			</Property>
+			<Property Name="IsAnsiNullsOn" Value="True" />
+			<Relationship Name="Columns">
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistory].[instance_id]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistory].[Instance]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistory].[InstanceHost]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistory].[InstanceName]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistory].[ServerName]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[servers].[name]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistory].[JobName]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobs].[name]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistory].[StepMessage]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[message]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistory].[RunStatus]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistory].[RetryCount]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[retries_attempted]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistory].[JobBegin]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistory].[JobBeginDate]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistory].[JobBeginTime]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistory].[JobEnd]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistory].[JobEndDate]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistory].[JobEndTime]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistory].[DurationDays]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistory].[DurationMinutes]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistory].[DurationSeconds]" />
+				</Entry>
+			</Relationship>
+			<Relationship Name="QueryDependencies">
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobs]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[servers]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobs].[originating_server_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[servers].[server_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobs].[job_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[job_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[run_status]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[servers].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobs].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[message]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[retries_attempted]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[date]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[char]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[run_date]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[time]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[varchar]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[run_time]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[run_duration]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[step_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[servers].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobs].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[message]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[run_status]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[retries_attempted]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[datetime]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[int]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[servers].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobs].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[message]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[run_status]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[retries_attempted]" />
+				</Entry>
+			</Relationship>
+			<Relationship Name="Schema">
+				<Entry>
+					<References ExternalSource="Rogge.Track.Dbs.dacpac" Name="[track]" />
+				</Entry>
+			</Relationship>
+			<Annotation Type="SysCommentsObjectAnnotation">
+				<Property Name="Length" Value="2448" />
+				<Property Name="StartLine" Value="1" />
+				<Property Name="StartColumn" Value="1" />
+				<Property Name="HeaderContents" Value="CREATE VIEW [track].[SqlAgentHistory]&#xD;&#xA;WITH VIEW_METADATA&#xD;&#xA;AS" />
+				<Property Name="FooterContents" Value=";" />
+			</Annotation>
+		</Element>
+		<Element Type="SqlView" Name="[track].[SqlAgentHistorySteps]">
+			<Property Name="IsMetadataReported" Value="True" />
+			<Property Name="QueryScript">
+				<Value><![CDATA[
+SELECT
+		[instance_id]			= CHECKSUM(@@SERVERNAME),
+		[job_instance_id]		= [t].[instance_id],
+
+		[Instance]				= @@SERVERNAME,
+		[InstanceHost]			= CAST(SERVERPROPERTY('MachineName') AS VARCHAR),
+		[InstanceName]			= @@SERVICENAME,
+
+	[t].[ServerName],
+	[t].[JobName],
+	[t].[StepId],
+	[t].[StepName],
+	[t].[StepMessage],
+		[RunStatus]				= CASE [t].[run_status]
+									WHEN 0	THEN 'Failed'
+									WHEN 1	THEN 'Succeeded'
+									WHEN 2	THEN 'Retry'
+									WHEN 3	THEN 'Canceled'
+									WHEN 4	THEN 'In Progress'
+									ELSE		 'Unknown'
+									END,
+
+	[t].[RetryCount],
+
+	[t].[JobBegin],
+	[t].[JobBeginDate],
+	[t].[JobBeginTime],
+
+		[JobEnd]				= DATEADD(SECOND, [t].[DurationSeconds], [t].[JobBegin]),
+		[JobEndDate]			= CONVERT(DATE, DATEADD(SECOND, [t].[DurationSeconds], [t].[JobBegin])),
+		[JobEndTime]			= DATEADD(SECOND, [t].[DurationSeconds], [t].[JobBeginTime]),
+
+		[DurationDays]			= [t].[DurationSeconds] / 86400.0,
+		[DurationMinutes]		= [t].[DurationSeconds] / 60.0,
+	[t].[DurationSeconds]
+FROM (
+	SELECT
+		[t].[instance_id],
+		[t].[run_status],
+
+		[t].[ServerName],
+		[t].[JobName],
+		[t].[StepId],
+		[t].[StepName],
+		[t].[StepMessage],
+		[t].[RetryCount],
+
+			[JobBegin]			= CONVERT(DATETIME, [t].[JobBeginDate]) + CONVERT(DATETIME, [t].[JobBeginTime]),
+		[t].[JobBeginDate],
+		[t].[JobBeginTime],
+
+			[DurationSeconds]	= CONVERT(INT, LEFT([t].[Duration], 2))				* 86400 +	--	Days
+									CONVERT(INT, SUBSTRING([t].[Duration], 4, 2))	* 3600 +	--	Hours
+									CONVERT(INT, SUBSTRING([t].[Duration], 7, 2))	* 60 +		--	Minutes
+									CONVERT(INT, RIGHT([t].[Duration], 2))						--	Seconds
+	FROM (
+		SELECT
+			[h].[instance_id],
+			[h].[run_status],
+
+				[ServerName]		= [v].[name],
+				[JobName]			= [j].[name],
+				[StepId]			= [h].[step_id],
+				[StepName]			= [h].[step_name],
+				[StepMessage]		= [h].[message],
+				[RetryCount]		= [h].[retries_attempted],
+				[JobBeginDate]		= CONVERT(DATE, CONVERT(CHAR(8), [h].[run_date]), 112),
+				[JobBeginTime]		= CONVERT(TIME, STUFF(STUFF(RIGHT(REPLICATE('0', 6) + CONVERT(VARCHAR(6), [h].[run_time]), 6), 5, 0, ':'), 3, 0, ':'), 120),
+				[Duration]			= STUFF(STUFF(STUFF(RIGHT(REPLICATE('0', 8) + CONVERT(VARCHAR(8), [h].[run_duration]), 8), 3, 0, ':'), 6, 0, ':'), 9, 0, ':')
+		FROM
+			[msdb].[dbo].[sysjobs]						[j]
+		INNER JOIN
+			[msdb].[sys].[servers]						[v]
+				ON	([j].[originating_server_id]	=	[v].[server_id])
+		INNER JOIN
+			[msdb].[dbo].[sysjobhistory]				[h]
+				ON	([j].[job_id]					=	[h].[job_id])
+		WHERE
+			([h].[step_id] <> 0)
+		) [t]
+	) [t]]]></Value>
+			</Property>
+			<Property Name="IsAnsiNullsOn" Value="True" />
+			<Relationship Name="Columns">
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistorySteps].[instance_id]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistorySteps].[job_instance_id]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[instance_id]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistorySteps].[Instance]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistorySteps].[InstanceHost]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistorySteps].[InstanceName]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistorySteps].[ServerName]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[servers].[name]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistorySteps].[JobName]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobs].[name]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistorySteps].[StepId]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[step_id]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistorySteps].[StepName]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[step_name]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistorySteps].[StepMessage]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[message]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistorySteps].[RunStatus]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistorySteps].[RetryCount]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[retries_attempted]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistorySteps].[JobBegin]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistorySteps].[JobBeginDate]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistorySteps].[JobBeginTime]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistorySteps].[JobEnd]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistorySteps].[JobEndDate]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistorySteps].[JobEndTime]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistorySteps].[DurationDays]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistorySteps].[DurationMinutes]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentHistorySteps].[DurationSeconds]" />
+				</Entry>
+			</Relationship>
+			<Relationship Name="QueryDependencies">
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobs]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[servers]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobs].[originating_server_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[servers].[server_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobs].[job_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[job_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[instance_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[run_status]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[servers].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobs].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[step_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[step_name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[message]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[retries_attempted]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[date]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[char]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[run_date]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[time]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[varchar]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[run_time]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[run_duration]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[step_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[instance_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[run_status]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[servers].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobs].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[step_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[step_name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[message]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[retries_attempted]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[datetime]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[int]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[instance_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[servers].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobs].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[step_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[step_name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[message]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[run_status]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobhistory].[retries_attempted]" />
+				</Entry>
+			</Relationship>
+			<Relationship Name="Schema">
+				<Entry>
+					<References ExternalSource="Rogge.Track.Dbs.dacpac" Name="[track]" />
+				</Entry>
+			</Relationship>
+			<Annotation Type="SysCommentsObjectAnnotation">
+				<Property Name="Length" Value="2686" />
+				<Property Name="StartLine" Value="1" />
+				<Property Name="StartColumn" Value="1" />
+				<Property Name="HeaderContents" Value="CREATE VIEW [track].[SqlAgentHistorySteps]&#xD;&#xA;WITH VIEW_METADATA&#xD;&#xA;AS" />
+				<Property Name="FooterContents" Value=";" />
+			</Annotation>
+		</Element>
+		<Element Type="SqlView" Name="[track].[SqlAgentSchedule]">
+			<Property Name="IsMetadataReported" Value="True" />
+			<Property Name="QueryScript">
+				<Value><![CDATA[
+WITH [cte]
+(
+	[idx],
+	[ScheduleUid],
+	[SubFrequency],
+	[SubFrequencyInterval],
+	[PreviousStartTime],
+	[IntermediateStartTime],
+	[ActiveEndTime],
+	[IntervalLimit]
+)
+AS
+(
+	SELECT ALL
+			[idx]						= 1,
+		[a].[ScheduleUid],
+		[a].[SubFrequency],
+		[a].[SubFrequencyInterval],
+			[PreviousStartTime]			= [a].[ActiveBeginTime],
+			[IntermediateStartTime]		= [a].[ActiveBeginTime],
+		[a].[ActiveEndTime],
+		[a].[IntervalLimit]
+	FROM
+		[track].[SqlAgentScheduleBase]	[a]
+
+	UNION ALL
+
+	SELECT ALL
+		[t].[idx],
+		[t].[ScheduleUid],
+		[t].[SubFrequency],
+		[t].[SubFrequencyInterval],
+		[t].[PreviousStartTime],
+		[t].[IntermediateStartTime],
+		[t].[ActiveEndTime],
+		[t].[IntervalLimit]
+	FROM (
+		SELECT ALL
+				[idx]						= [c].[idx] + 1,
+			[c].[ScheduleUid],
+			[c].[SubFrequency],
+			[c].[SubFrequencyInterval],
+				[PreviousStartTime]			= [c].[IntermediateStartTime],
+				[IntermediateStartTime]		= CASE [c].[SubFrequency]
+												WHEN 'Seconds'	THEN DATEADD(SECOND, [c].[SubFrequencyInterval], [c].[IntermediateStartTime])
+												WHEN 'Minutes'	THEN DATEADD(MINUTE, [c].[SubFrequencyInterval], [c].[IntermediateStartTime])
+												WHEN 'Hours'	THEN DATEADD(HOUR,	 [c].[SubFrequencyInterval], [c].[IntermediateStartTime])
+												END,
+			[c].[ActiveEndTime],
+			[c].[IntervalLimit]
+		FROM
+			[cte]			[c]
+		WHERE
+				([c].[IntervalLimit]			<=	100)
+			AND	([c].[SubFrequencyInterval]		>	0)
+			AND	([c].[IntermediateStartTime]	<	[c].[ActiveEndTime])
+			AND	([c].[idx]						<=	100)
+		) [t]
+	WHERE
+		([t].[IntermediateStartTime] >= [t].[PreviousStartTime])
+)
+SELECT
+		[instance_id]			= CHECKSUM(@@SERVERNAME),
+
+		[Instance]				= @@SERVERNAME,
+		[InstanceHost]			= CAST(SERVERPROPERTY('MachineName') AS VARCHAR),
+		[InstanceName]			= @@SERVICENAME,
+
+	[t].[ServerName],
+	[t].[JobName],
+	[t].[JobEnabled],
+	[t].[Category],
+	[t].[CategoryClass],
+	[t].[CategoryType],
+	[t].[OwnerName],
+	[t].[ScheduleName],
+	[t].[ScheduleEnabled],
+	[t].[FrequencyInterval],
+	[t].[Frequency],
+	[t].[SubFrequencyInterval],
+	[t].[SubFrequency],
+
+	[t].[ActiveBegin],
+	[t].[ActiveBeginDate],
+	[t].[ActiveBeginTime],
+
+	[t].[ActiveEnd],
+	[t].[ActiveEndDate],
+	[t].[ActiveEndTime],
+
+		[ScheduleSpanDays]			= [t].[ScheduleSpanSeconds] / 86400.0,
+		[ScheduleSpanMinutes]		= [t].[ScheduleSpanSeconds] / 60.0,
+	[t].[ScheduleSpanSeconds],
+
+	[t].[NextRun],
+	[t].[NextRunDate],
+	[t].[NextRunTime],
+	
+	[c].[IntermediateStartTime]
+FROM
+	[track].[SqlAgentScheduleBase]	[t]
+LEFT OUTER JOIN
+	[cte]							[c]
+		ON	([t].[ScheduleUid]	=	[c].[ScheduleUid])]]></Value>
+			</Property>
+			<Property Name="IsAnsiNullsOn" Value="True" />
+			<Relationship Name="Columns">
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[instance_id]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[Instance]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[InstanceHost]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[InstanceName]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[ServerName]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[track].[SqlAgentScheduleBase].[ServerName]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[JobName]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[track].[SqlAgentScheduleBase].[JobName]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[JobEnabled]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[track].[SqlAgentScheduleBase].[JobEnabled]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[Category]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[track].[SqlAgentScheduleBase].[Category]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[CategoryClass]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[track].[SqlAgentScheduleBase].[CategoryClass]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[CategoryType]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[track].[SqlAgentScheduleBase].[CategoryType]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[OwnerName]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[track].[SqlAgentScheduleBase].[OwnerName]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[ScheduleName]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[track].[SqlAgentScheduleBase].[ScheduleName]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[ScheduleEnabled]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[track].[SqlAgentScheduleBase].[ScheduleEnabled]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[FrequencyInterval]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[track].[SqlAgentScheduleBase].[FrequencyInterval]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[Frequency]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[track].[SqlAgentScheduleBase].[Frequency]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[SubFrequencyInterval]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[track].[SqlAgentScheduleBase].[SubFrequencyInterval]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[SubFrequency]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[track].[SqlAgentScheduleBase].[SubFrequency]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[ActiveBegin]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[track].[SqlAgentScheduleBase].[ActiveBegin]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[ActiveBeginDate]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[track].[SqlAgentScheduleBase].[ActiveBeginDate]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[ActiveBeginTime]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[track].[SqlAgentScheduleBase].[ActiveBeginTime]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[ActiveEnd]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[track].[SqlAgentScheduleBase].[ActiveEnd]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[ActiveEndDate]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[track].[SqlAgentScheduleBase].[ActiveEndDate]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[ActiveEndTime]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[track].[SqlAgentScheduleBase].[ActiveEndTime]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[ScheduleSpanDays]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[ScheduleSpanMinutes]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[ScheduleSpanSeconds]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[track].[SqlAgentScheduleBase].[ScheduleSpanSeconds]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[NextRun]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[track].[SqlAgentScheduleBase].[NextRun]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[NextRunDate]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[track].[SqlAgentScheduleBase].[NextRunDate]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[NextRunTime]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[track].[SqlAgentScheduleBase].[NextRunTime]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[IntermediateStartTime]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References Name="[track].[SqlAgentSchedule].[CTE1].[cte].[IntermediateStartTime]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+			</Relationship>
+			<Relationship Name="DynamicObjects">
+				<Entry>
+					<Element Type="SqlDynamicColumnSource" Name="[track].[SqlAgentSchedule].[CTE1].[cte]">
+						<Relationship Name="Columns">
+							<Entry>
+								<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[CTE1].[cte].[idx]" />
+							</Entry>
+							<Entry>
+								<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[CTE1].[cte].[ScheduleUid]">
+									<Relationship Name="ExpressionDependencies">
+										<Entry>
+											<References Name="[track].[SqlAgentScheduleBase].[ScheduleUid]" />
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[CTE1].[cte].[SubFrequency]">
+									<Relationship Name="ExpressionDependencies">
+										<Entry>
+											<References Name="[track].[SqlAgentScheduleBase].[SubFrequency]" />
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[CTE1].[cte].[SubFrequencyInterval]">
+									<Relationship Name="ExpressionDependencies">
+										<Entry>
+											<References Name="[track].[SqlAgentScheduleBase].[SubFrequencyInterval]" />
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[CTE1].[cte].[PreviousStartTime]">
+									<Relationship Name="ExpressionDependencies">
+										<Entry>
+											<References Name="[track].[SqlAgentScheduleBase].[ActiveBeginTime]" />
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[CTE1].[cte].[IntermediateStartTime]">
+									<Relationship Name="ExpressionDependencies">
+										<Entry>
+											<References Name="[track].[SqlAgentScheduleBase].[ActiveBeginTime]" />
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[CTE1].[cte].[ActiveEndTime]">
+									<Relationship Name="ExpressionDependencies">
+										<Entry>
+											<References Name="[track].[SqlAgentScheduleBase].[ActiveEndTime]" />
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+							<Entry>
+								<Element Type="SqlComputedColumn" Name="[track].[SqlAgentSchedule].[CTE1].[cte].[IntervalLimit]">
+									<Relationship Name="ExpressionDependencies">
+										<Entry>
+											<References Name="[track].[SqlAgentScheduleBase].[IntervalLimit]" />
+										</Entry>
+									</Relationship>
+								</Element>
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+			</Relationship>
+			<Relationship Name="QueryDependencies">
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[ScheduleUid]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[SubFrequency]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[SubFrequencyInterval]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[ActiveBeginTime]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[ActiveBeginTime]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[ActiveEndTime]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[IntervalLimit]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentSchedule].[CTE1].[cte].[idx]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentSchedule].[CTE1].[cte].[ScheduleUid]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentSchedule].[CTE1].[cte].[SubFrequency]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentSchedule].[CTE1].[cte].[SubFrequencyInterval]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentSchedule].[CTE1].[cte].[IntermediateStartTime]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentSchedule].[CTE1].[cte].[ActiveEndTime]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentSchedule].[CTE1].[cte].[IntervalLimit]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentSchedule].[CTE1].[cte].[ScheduleUid]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentSchedule].[CTE1].[cte].[SubFrequency]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentSchedule].[CTE1].[cte].[SubFrequencyInterval]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentSchedule].[CTE1].[cte].[ActiveEndTime]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentSchedule].[CTE1].[cte].[IntervalLimit]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[ScheduleUid]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentSchedule].[CTE1].[cte].[ScheduleUid]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[varchar]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[ServerName]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[JobName]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[JobEnabled]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[Category]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[CategoryClass]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[CategoryType]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[OwnerName]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[ScheduleName]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[ScheduleEnabled]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[FrequencyInterval]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[Frequency]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[SubFrequencyInterval]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[SubFrequency]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[ActiveBegin]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[ActiveBeginDate]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[ActiveBeginTime]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[ActiveEnd]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[ActiveEndDate]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[ActiveEndTime]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[ScheduleSpanSeconds]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[NextRun]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[NextRunDate]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentScheduleBase].[NextRunTime]" />
+				</Entry>
+				<Entry>
+					<References Name="[track].[SqlAgentSchedule].[CTE1].[cte].[IntermediateStartTime]" />
+				</Entry>
+			</Relationship>
+			<Relationship Name="Schema">
+				<Entry>
+					<References ExternalSource="Rogge.Track.Dbs.dacpac" Name="[track]" />
+				</Entry>
+			</Relationship>
+			<Annotation Type="SysCommentsObjectAnnotation">
+				<Property Name="Length" Value="2686" />
+				<Property Name="StartLine" Value="1" />
+				<Property Name="StartColumn" Value="1" />
+				<Property Name="HeaderContents" Value="CREATE VIEW [track].[SqlAgentSchedule]&#xD;&#xA;WITH VIEW_METADATA&#xD;&#xA;AS" />
+				<Property Name="FooterContents" Value=";" />
+			</Annotation>
+		</Element>
+		<Element Type="SqlView" Name="[track].[SqlAgentScheduleBase]">
+			<Property Name="IsMetadataReported" Value="True" />
+			<Property Name="QueryScript">
+				<Value><![CDATA[
+SELECT
+		[instance_id]			= CHECKSUM(@@SERVERNAME),
+
+		[Instance]				= @@SERVERNAME,
+		[InstanceHost]			= CAST(SERVERPROPERTY('MachineName') AS VARCHAR),
+		[InstanceName]			= @@SERVICENAME,
+
+	[t].[ServerName],
+	[t].[JobName],
+	[t].[JobEnabled],
+	[t].[Category],
+	[t].[CategoryClass],
+	[t].[CategoryType],
+	[t].[OwnerName],
+	[t].[ScheduleName],
+	[t].[ScheduleEnabled],
+	[t].[FrequencyInterval],
+	[t].[Frequency],
+	[t].[SubFrequencyInterval],
+	[t].[SubFrequency],
+
+		[ActiveBegin]			= CONVERT(DATETIME, [t].[ActiveBeginDate]) + CONVERT(DATETIME, [t].[ActiveBeginTime]),
+	[t].[ActiveBeginDate],
+	[t].[ActiveBeginTime],
+
+		[ActiveEnd]				= CONVERT(DATETIME, [t].[ActiveEndDate]) + CONVERT(DATETIME, [t].[ActiveEndTime]),
+	[t].[ActiveEndDate],
+	[t].[ActiveEndTime],
+
+		[ScheduleSpanSeconds]	= DATEDIFF(SECOND, [t].[ActiveBeginTime], [t].[ActiveEndTime]),
+
+		[NextRun]				= CONVERT(DATETIME, [t].[NextRunDate]) + CONVERT(DATETIME, [t].[NextRunTime]),
+	[t].[NextRunDate],
+	[t].[NextRunTime],
+
+	[t].[ScheduleUid],
+		[IntervalLimit]			=	CASE [t].[SubFrequency]
+										WHEN 'Seconds'					THEN 86000.0
+										WHEN 'Minutes'					THEN  1400.0
+										WHEN 'Hours'					THEN    24.0
+										WHEN 'At the specified time'	THEN	NULL
+										ELSE 1.0
+										END / CONVERT(FLOAT, [t].[SubFrequencyInterval])
+FROM (
+	SELECT
+		[ServerName]			= [v].[name],
+		[JobName]				= [j].[name],
+		[JobEnabled]			= CASE [j].[enabled]
+									WHEN 1 THEN 'Enabled'
+									WHEN 0 THEN 'Disabled'
+									ELSE		'Unknown'
+									END,
+		[Category]				= [c].[name],
+		[CategoryClass]			= CASE [c].[category_class]
+									WHEN 1 THEN 'Job'
+									WHEN 2 THEN 'Alert'
+									WHEN 3 THEN 'Operator'
+									ELSE		'Unknown'
+									END,
+		[CategoryType]			= CASE [c].[category_type]
+									WHEN 1 THEN 'Local'
+									WHEN 2 THEN 'Multiserver'
+									WHEN 3 THEN 'None'
+									ELSE		'Unknown'
+									END,
+		[OwnerName]				= [p].[name],
+		[ScheduleName]			= [s].[name],
+		[ScheduleEnabled]		= CASE [s].[enabled]
+									WHEN 1 THEN 'Enabled'
+									WHEN 0 THEN 'Disabled'
+									ELSE		'Unknown'
+									END,
+	
+		[FrequencyInterval]		= [s].[freq_interval],
+		[Frequency]				= CASE [s].[freq_type]
+									WHEN   1	THEN 'One time only'
+									WHEN   4	THEN 'Daily'
+									WHEN   8	THEN 'Weekly'
+									WHEN  16	THEN 'Monthly'
+									WHEN  32	THEN 'Monthly, relative to freq_interval'
+									WHEN  64	THEN 'SQL Server Agent service starts'
+									WHEN 128	THEN 'Idle'
+									ELSE			 'Unknown'
+									END,
+
+		[SubFrequencyInterval]	= [s].[freq_subday_interval],
+		[SubFrequency]			= CASE [s].[freq_subday_type]
+									WHEN 1 THEN 'At the specified time'
+									WHEN 2 THEN 'Seconds'
+									WHEN 4 THEN 'Minutes'
+									WHEN 8 THEN 'Hours'
+									ELSE		'Unknown'
+									END,
+		[ActiveBeginDate]		= CONVERT(DATE, RIGHT(REPLICATE('0', 8) + CONVERT(CHAR(8), [s].[active_start_date]), 8), 112),
+		[ActiveBeginTime]		= CONVERT(TIME, STUFF(STUFF(RIGHT(REPLICATE('0', 6) + CONVERT(VARCHAR(6), [s].[active_start_time]),	6), 5, 0, ':'), 3, 0, ':'), 120),
+
+		[ActiveEndDate]			= CASE WHEN ([s].[freq_subday_type] = 1)
+									THEN NULL
+									ELSE CONVERT(DATE, RIGHT(REPLICATE('0', 8) + CONVERT(CHAR(8), [s].[active_end_date]), 8), 112)
+									END,
+		[ActiveEndTime]			= CASE WHEN ([s].[freq_subday_type] = 1)
+									THEN NULL
+									ELSE CONVERT(TIME, STUFF(STUFF(RIGHT(REPLICATE('0', 6) + CONVERT(VARCHAR(6), [s].[active_end_time]), 6), 5, 0, ':'), 3, 0, ':'), 120)
+									END,
+
+		[NextRunDate]			= CASE WHEN ([z].[next_run_date] > 0) THEN
+									CONVERT(DATE, RIGHT(REPLICATE('0', 8) + CONVERT(CHAR(8), [z].[next_run_date]), 8), 112)
+									END,
+		[NextRunTime]			= CONVERT(TIME, STUFF(STUFF(RIGHT(REPLICATE('0', 6) + CONVERT(VARCHAR(6), [z].[next_run_time]), 6), 5, 0, ':'), 3, 0, ':'), 120),
+
+		[ScheduleUid]			= [s].[schedule_uid]
+	FROM
+		[msdb].[dbo].[sysjobs]						[j]
+	LEFT OUTER JOIN
+		[msdb].[sys].[servers]						[v]
+			ON	([j].[originating_server_id]	=	[v].[server_id])
+	LEFT OUTER JOIN
+		[msdb].[dbo].[syscategories]				[c]
+			ON	([j].[category_id]				=	[c].[category_id])
+	LEFT OUTER JOIN
+		[msdb].[sys].[database_principals]			[p]
+			ON	([j].[owner_sid]				=	[p].[sid])
+	LEFT OUTER JOIN
+		[msdb].[dbo].[sysjobschedules]				[z]
+			ON	([j].[job_id]					=	[z].[job_id])
+	LEFT OUTER JOIN
+		[msdb].[dbo].[sysschedules]					[s]
+			ON	([z].[schedule_id]				=	[s].[schedule_id])
+	) [t]]]></Value>
+			</Property>
+			<Property Name="IsAnsiNullsOn" Value="True" />
+			<Relationship Name="Columns">
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[instance_id]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[Instance]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[InstanceHost]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[InstanceName]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[ServerName]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[servers].[name]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[JobName]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobs].[name]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[JobEnabled]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[Category]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[syscategories].[name]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[CategoryClass]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[CategoryType]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[OwnerName]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="master.dacpac" Name="[master]|[sys].[database_principals].[name]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[ScheduleName]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysschedules].[name]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[ScheduleEnabled]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[FrequencyInterval]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysschedules].[freq_interval]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[Frequency]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[SubFrequencyInterval]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysschedules].[freq_subday_interval]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[SubFrequency]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[ActiveBegin]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[ActiveBeginDate]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[ActiveBeginTime]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[ActiveEnd]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[ActiveEndDate]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[ActiveEndTime]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[ScheduleSpanSeconds]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[NextRun]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[NextRunDate]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[NextRunTime]" />
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[ScheduleUid]">
+						<Relationship Name="ExpressionDependencies">
+							<Entry>
+								<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysschedules].[schedule_uid]" />
+							</Entry>
+						</Relationship>
+					</Element>
+				</Entry>
+				<Entry>
+					<Element Type="SqlComputedColumn" Name="[track].[SqlAgentScheduleBase].[IntervalLimit]" />
+				</Entry>
+			</Relationship>
+			<Relationship Name="QueryDependencies">
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobs]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[servers]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobs].[originating_server_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[servers].[server_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[syscategories]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobs].[category_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[syscategories].[category_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[database_principals]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobs].[owner_sid]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[database_principals].[sid]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobschedules]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobs].[job_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobschedules].[job_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysschedules]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobschedules].[schedule_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysschedules].[schedule_id]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[servers].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobs].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobs].[enabled]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[syscategories].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[syscategories].[category_class]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[syscategories].[category_type]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[database_principals].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysschedules].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysschedules].[enabled]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysschedules].[freq_interval]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysschedules].[freq_type]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysschedules].[freq_subday_interval]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysschedules].[freq_subday_type]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[date]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[char]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysschedules].[active_start_date]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[time]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[varchar]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysschedules].[active_start_time]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysschedules].[active_end_date]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysschedules].[active_end_time]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobschedules].[next_run_date]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobschedules].[next_run_time]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysschedules].[schedule_uid]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[servers].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysjobs].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[syscategories].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="master.dacpac" Name="[master]|[sys].[database_principals].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysschedules].[name]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysschedules].[freq_interval]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysschedules].[freq_subday_interval]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[datetime]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="msdb.dacpac" Name="[msdb]|[dbo].[sysschedules].[schedule_uid]" />
+				</Entry>
+				<Entry>
+					<References ExternalSource="BuiltIns" Name="[float]" />
+				</Entry>
+			</Relationship>
+			<Relationship Name="Schema">
+				<Entry>
+					<References ExternalSource="Rogge.Track.Dbs.dacpac" Name="[track]" />
+				</Entry>
+			</Relationship>
+			<Annotation Type="SysCommentsObjectAnnotation">
+				<Property Name="Length" Value="4618" />
+				<Property Name="StartLine" Value="1" />
+				<Property Name="StartColumn" Value="1" />
+				<Property Name="HeaderContents" Value="CREATE VIEW [track].[SqlAgentScheduleBase]&#xD;&#xA;WITH VIEW_METADATA&#xD;&#xA;AS" />
+				<Property Name="FooterContents" Value=";" />
+			</Annotation>
+		</Element>
+	</Model>
+</DataSchemaModel>

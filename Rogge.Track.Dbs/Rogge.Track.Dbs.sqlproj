@@ -1,0 +1,147 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>Rogge.Track.Dbs</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{f3fe1e09-d8b6-4673-9f2f-fede90f5fdf2}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql150DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>Rogge.Track.Dbs</RootNamespace>
+    <AssemblyName>Rogge.Track.Dbs</AssemblyName>
+    <ModelCollation>1033, CI</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <SccProjectName>$/Library/Common/Rogge.Track.Dbs</SccProjectName>
+    <SccProvider>{4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}</SccProvider>
+    <SccAuxPath>https://dev.azure.com/roggeheflin</SccAuxPath>
+    <SccLocalPath>.</SccLocalPath>
+    <TargetFrameworkProfile />
+    <IncludeSchemaNameInFileName>True</IncludeSchemaNameInFileName>
+    <DefaultSchema>track</DefaultSchema>
+    <Parameterization>FORCED</Parameterization>
+    <EnableFullTextSearch>True</EnableFullTextSearch>
+    <Recovery>SIMPLE</Recovery>
+    <PageVerify>CHECKSUM</PageVerify>
+    <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
+    <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
+    <MemoryOptimizedElevateToSnapshot>False</MemoryOptimizedElevateToSnapshot>
+    <DbScopedConfigOptimizerHotfixes>On</DbScopedConfigOptimizerHotfixes>
+    <GenerateCreateScript>True</GenerateCreateScript>
+    <DbScopedConfigParameterSniffingSecondary>Off</DbScopedConfigParameterSniffingSecondary>
+    <DbScopedConfigParameterSniffing>Off</DbScopedConfigParameterSniffing>
+    <DbScopedConfigLegacyCardinalityEstimation>On</DbScopedConfigLegacyCardinalityEstimation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatTSqlWarningsAsErrors>True</TreatTSqlWarningsAsErrors>
+    <RunSqlCodeAnalysis>False</RunSqlCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="verf" />
+    <Folder Include="track" />
+    <Folder Include="verf\Tables" />
+    <Folder Include="verf\Procedures" />
+    <Folder Include="track\Tables" />
+    <Folder Include="track\Tables\Application" />
+    <Folder Include="track\Tables\Batch" />
+    <Folder Include="track\Tables\Procedure" />
+    <Folder Include="track\Views" />
+    <Folder Include="track\Procedures" />
+    <Folder Include="track\Procedures\Application" />
+    <Folder Include="track\Procedures\Batch" />
+    <Folder Include="track\Procedures\Procedure" />
+    <Folder Include="track\Functions" />
+    <Folder Include="Deployment" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="verf\verf.sql" />
+    <Build Include="track\track.sql" />
+    <Build Include="verf\Tables\verf.ItemCount.sql" />
+    <Build Include="verf\Procedures\verf.InsertItemCount.sql" />
+    <Build Include="track\Tables\Application\track.ApplicationLogBegin.sql" />
+    <Build Include="track\Tables\Application\track.ApplicationLogEnd.sql" />
+    <Build Include="track\Tables\Application\track.ApplicationLogErrors.sql" />
+    <Build Include="track\Tables\Application\track.ApplicationLogOrphans.sql" />
+    <Build Include="track\Tables\Batch\track.BatchLogBegin.sql" />
+    <Build Include="track\Tables\Batch\track.BatchLogEnd.sql" />
+    <Build Include="track\Tables\Procedure\track.ProcedureLogBegin.sql" />
+    <Build Include="track\Tables\Procedure\track.ProcedureLogEnd.sql" />
+    <Build Include="track\Tables\Procedure\track.ProcedureLogErrors.sql" />
+    <Build Include="track\Tables\Procedure\track.ProcedureLogOrphans.sql" />
+    <Build Include="track\Views\track.ApplicationLog.sql" />
+    <Build Include="track\Views\track.BatchLog.sql" />
+    <Build Include="track\Views\track.ProcedureLog.sql" />
+    <Build Include="track\Procedures\Application\track.Insert_ApplicationLogBegin.sql" />
+    <Build Include="track\Procedures\Application\track.Insert_ApplicationLogEnd.sql" />
+    <Build Include="track\Procedures\Application\track.Insert_ApplicationLogError.sql" />
+    <Build Include="track\Procedures\Application\track.Insert_ApplicationLogOrphan.sql" />
+    <Build Include="track\Procedures\Batch\track.Insert_BatchLogBegin.sql" />
+    <Build Include="track\Procedures\Batch\track.Insert_BatchLogEnd.sql" />
+    <Build Include="track\Procedures\Procedure\track.Insert_ProcedureLogBegin.sql" />
+    <Build Include="track\Procedures\Procedure\track.Insert_ProcedureLogEnd.sql" />
+    <Build Include="track\Procedures\Procedure\track.Insert_ProcedureLogError.sql" />
+    <Build Include="track\Procedures\Procedure\track.Insert_ProcedureLogOrphan.sql" />
+    <Build Include="track\Functions\track.BatchSize.sql" />
+    <Build Include="track\Functions\track.ProcedureAttributes.sql" />
+    <Build Include="track\Functions\track.StringOccuranceCount.sql" />
+    <Build Include="track\track.ExampleProcedure.sql" />
+    <Build Include="track\Procedures\Procedure\track.Insert_ProcedureLogIntermediate.sql" />
+    <Build Include="track\Tables\Procedure\track.ProcedureLogIntermediate.sql" />
+    <Build Include="track\Views\track.ProcedureLogInter.sql" />
+    <Build Include="track\Tables\track.SysSsisLogDetail.sql" />
+    <Build Include="track\Procedures\dbo.sp_ssis_addlogentry.sql" />
+    <Build Include="track\Views\track.SsisLogPackage.sql" />
+    <Build Include="track\Views\track.SsisLogSources.sql" />
+    <Build Include="track\Procedures\track.Delete_ProcedureLog.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\150\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\150\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Deployment\Rogge.Track.Dbs.publish.xml" />
+  </ItemGroup>
+</Project>

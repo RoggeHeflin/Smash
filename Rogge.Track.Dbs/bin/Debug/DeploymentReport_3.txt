@@ -1,0 +1,194 @@
+﻿** Highlights
+     Tables that will be rebuilt
+       [track].[ApplicationLogBegin]
+       [track].[ApplicationLogOrphans]
+       [track].[BatchLogBegin]
+       [track].[BatchLogEnd]
+       [track].[ProcedureLogBegin]
+       [track].[ProcedureLogIntermediate]
+       [track].[ProcedureLogOrphans]
+     Clustered indexes that will be dropped
+       None
+     Clustered indexes that will be created
+       None
+     Possible data issues
+       The column [track].[ApplicationLogBegin].[txInsertedApp] is being dropped, data loss could occur.
+       The column [track].[ApplicationLogBegin].[txInsertedServer] is being dropped, data loss could occur.
+       The column [track].[ApplicationLogOrphans].[txInsertedApp] is being dropped, data loss could occur.
+       The column [track].[BatchLogBegin].[txInsertedApp] is being dropped, data loss could occur.
+       The column [track].[BatchLogBegin].[txInsertedServer] is being dropped, data loss could occur.
+       The column [track].[BatchLogEnd].[UpdateDateBeg] is being dropped, data loss could occur.
+       The column [track].[BatchLogEnd].[UpdateDateEnd] is being dropped, data loss could occur.
+       The column [track].[BatchLogEnd].[UpdateBeg] on table [track].[BatchLogEnd] must be added, but the column has no default
+         value and does not allow NULL values. If the table contains data, the ALTER script will not work. To avoid this issue
+         you must either: add a default value to the column, mark it as allowing NULL values, or enable the generation of
+         smart-defaults as a deployment option.
+       The column [track].[ProcedureLogBegin].[ObjectId] is being dropped, data loss could occur.
+       The column [track].[ProcedureLogBegin].[SchemaId] is being dropped, data loss could occur.
+       The column [track].[ProcedureLogBegin].[txInsertedApp] is being dropped, data loss could occur.
+       The column [track].[ProcedureLogBegin].[object_id] on table [track].[ProcedureLogBegin] must be added, but the column
+         has no default value and does not allow NULL values. If the table contains data, the ALTER script will not work. To
+         avoid this issue you must either: add a default value to the column, mark it as allowing NULL values, or enable the
+         generation of smart-defaults as a deployment option.
+       The column [track].[ProcedureLogBegin].[schema_id] on table [track].[ProcedureLogBegin] must be added, but the column
+         has no default value and does not allow NULL values. If the table contains data, the ALTER script will not work. To
+         avoid this issue you must either: add a default value to the column, mark it as allowing NULL values, or enable the
+         generation of smart-defaults as a deployment option.
+       The column [track].[ProcedureLogOrphans].[txInsertedApp] is being dropped, data loss could occur.
+
+** User actions
+     Drop
+       [track].[DF_ApplicationLogBegin_txInsertedServer] (Default Constraint)
+       [track].[DF_ApplicationLogBegin_txInsertedApp] (Default Constraint)
+       [track].[DF_ApplicationLogOrphans_txInsertedApp] (Default Constraint)
+       [track].[DF_BatchLogBegin_txInsertedApp] (Default Constraint)
+       [track].[DF_BatchLogBegin_txInsertedServer] (Default Constraint)
+       [track].[DF_ProcedureLogBegin_txInsertedApp] (Default Constraint)
+       [track].[DF_ProcedureLogOrphans_txInsertedApp] (Default Constraint)
+       [track].[CL_ProcedureLogBegin_NameObject] (Check Constraint)
+       [track].[CL_ProcedureLogBegin_NameSchema] (Check Constraint)
+     Unbind schemabinding
+       [track].[ApplicationLog] (View)
+       [track].[BatchLog] (View)
+       [track].[ProcedureLogInter] (View)
+     Table rebuild
+       [track].[ApplicationLogBegin] (Table)
+       [track].[ApplicationLogOrphans] (Table)
+       [track].[BatchLogBegin] (Table)
+       [track].[BatchLogEnd] (Table)
+       [track].[ProcedureLogBegin] (Table)
+       [track].[ProcedureLogIntermediate] (Table)
+       [track].[ProcedureLogOrphans] (Table)
+     Create
+       [track].[SsisLogDetail] (Table)
+       [track].[DF_SsisLogDetail_txInserted] (Default Constraint)
+       [track].[DF_SsisLogDetail_txInsertedSid] (Default Constraint)
+       [track].[DF_SsisLogDetail_txInsertedUserOriginal] (Default Constraint)
+       [track].[DF_SsisLogDetail_txInsertedUserExecute] (Default Constraint)
+       [track].[DF_SsisLogDetail_txInsertedHost] (Default Constraint)
+       [track].[DF_SsisLogDetail_txInsertedApp] (Default Constraint)
+       [track].[DF_SsisLogDetail_txRowReplication] (Default Constraint)
+       [track].[CL_ProcedureLogBegin_SchemaName] (Check Constraint)
+       [track].[CL_ProcedureLogBegin_ObjectName] (Check Constraint)
+       [track].[SsisLogPackage] (View)
+       [track].[SsisLogSource] (View)
+       [track].[Insert_ApplicationLogBegin] (Procedure)
+       [track].[Insert_ApplicationLogEnd] (Procedure)
+       [track].[Insert_ApplicationLogError] (Procedure)
+       [track].[Insert_BatchLogBegin] (Procedure)
+       [track].[Insert_BatchLogEnd] (Procedure)
+       [track].[Insert_ProcedureLogBegin] (Procedure)
+       [track].[Insert_ProcedureLogEnd] (Procedure)
+       [track].[Insert_ProcedureLogError] (Procedure)
+       [track].[Insert_ProcedureLogIntermediate] (Procedure)
+       [track].[Insert_ProcedureLogOrphan] (Procedure)
+       [track].[Insert_ApplicationLogOrphan] (Procedure)
+     Rebind schemabinding
+       [track].[ApplicationLog] (View)
+       [track].[BatchLog] (View)
+       [track].[ProcedureLogInter] (View)
+     Alter
+       [track].[BatchSize] (Function)
+       [track].[ProcedureAttributes] (Function)
+       [track].[ProcedureLog] (View)
+       [dbo].[sp_ssis_addlogentry] (Procedure)
+       [track].[ExampleProcedure] (Procedure)
+       [verf].[InsertItemCount] (Procedure)
+
+** Supporting actions
+     Drop
+       [track].[DF_ApplicationLogBegin_txInsertedUserOriginal] (Default Constraint)
+       [track].[DF_ApplicationLogBegin_txInserted] (Default Constraint)
+       [track].[DF_ApplicationLogBegin_txInsertedUserExecute] (Default Constraint)
+       [track].[DF_ApplicationLogBegin_txInsertedSid] (Default Constraint)
+       [track].[DF_ApplicationLogBegin_txRowReplication] (Default Constraint)
+       [track].[DF_ApplicationLogBegin_txInsertedHost] (Default Constraint)
+       [track].[DF_ApplicationLogOrphans_txRowReplication] (Default Constraint)
+       [track].[DF_ApplicationLogOrphans_txInsertedHost] (Default Constraint)
+       [track].[DF_ApplicationLogOrphans_txInsertedUserExecute] (Default Constraint)
+       [track].[DF_ApplicationLogOrphans_txInserted] (Default Constraint)
+       [track].[DF_ApplicationLogOrphans_txInsertedSid] (Default Constraint)
+       [track].[DF_ApplicationLogOrphans_txInsertedUserOriginal] (Default Constraint)
+       [track].[DF_BatchLogBegin_txInserted] (Default Constraint)
+       [track].[DF_BatchLogBegin_txInsertedSid] (Default Constraint)
+       [track].[DF_BatchLogBegin_txInsertedUserOriginal] (Default Constraint)
+       [track].[DF_BatchLogBegin_txRowReplication] (Default Constraint)
+       [track].[DF_BatchLogBegin_txInsertedUserExecute] (Default Constraint)
+       [track].[DF_BatchLogBegin_txInsertedHost] (Default Constraint)
+       [track].[DF_BatchLogEnd_txInserted] (Default Constraint)
+       [track].[DF_BatchLogEnd_txRowReplication] (Default Constraint)
+       [track].[DF_ProcedureLogBegin_txInserted] (Default Constraint)
+       [track].[DF_ProcedureLogBegin_txInsertedSid] (Default Constraint)
+       [track].[DF_ProcedureLogBegin_txInsertedUserOriginal] (Default Constraint)
+       [track].[DF_ProcedureLogBegin_txInsertedUserExecute] (Default Constraint)
+       [track].[DF_ProcedureLogBegin_txInsertedHost] (Default Constraint)
+       [track].[DF_ProcedureLogBegin_txRowReplication] (Default Constraint)
+       [track].[DF_ProcedureLogIntermediate_txInserted] (Default Constraint)
+       [track].[DF_ProcedureLogIntermediate_txRowReplication] (Default Constraint)
+       [track].[DF_ProcedureLogOrphans_txInserted] (Default Constraint)
+       [track].[DF_ProcedureLogOrphans_txInsertedSid] (Default Constraint)
+       [track].[DF_ProcedureLogOrphans_txInsertedUserOriginal] (Default Constraint)
+       [track].[DF_ProcedureLogOrphans_txInsertedUserExecute] (Default Constraint)
+       [track].[DF_ProcedureLogOrphans_txInsertedHost] (Default Constraint)
+       [track].[DF_ProcedureLogOrphans_txRowReplication] (Default Constraint)
+       [track].[FK_ApplicationLogErrors_Application] (Foreign Key)
+       [track].[FK_ApplicationLogEnd_Application] (Foreign Key)
+       [track].[FK_ApplicationLogOrphans_Application] (Foreign Key)
+       [track].[FK_BatchLogEnd_Batch] (Foreign Key)
+       [track].[FK_ProcedureLogOrphans_Procedure] (Foreign Key)
+       [track].[FK_ProcedureLogIntermediate_Procedure] (Foreign Key)
+       [track].[FK_ProcedureLogErrors_Procedure] (Foreign Key)
+       [track].[FK_ProcedureLogEnd_Procedure] (Foreign Key)
+     Create
+       [track].[FK_ApplicationLogErrors_Application] (Foreign Key)
+       [track].[FK_ApplicationLogEnd_Application] (Foreign Key)
+       [track].[FK_ApplicationLogOrphans_Application] (Foreign Key)
+       [track].[FK_BatchLogEnd_Batch] (Foreign Key)
+       [track].[FK_ProcedureLogOrphans_Procedure] (Foreign Key)
+       [track].[FK_ProcedureLogIntermediate_Procedure] (Foreign Key)
+       [track].[FK_ProcedureLogErrors_Procedure] (Foreign Key)
+       [track].[FK_ProcedureLogEnd_Procedure] (Foreign Key)
+
+The column [track].[ApplicationLogBegin].[txInsertedApp] is being dropped, data loss could occur.
+The column [track].[ApplicationLogBegin].[txInsertedServer] is being dropped, data loss could occur.
+The column [track].[ApplicationLogOrphans].[txInsertedApp] is being dropped, data loss could occur.
+The column [track].[BatchLogBegin].[txInsertedApp] is being dropped, data loss could occur.
+The column [track].[BatchLogBegin].[txInsertedServer] is being dropped, data loss could occur.
+The column [track].[BatchLogEnd].[UpdateDateBeg] is being dropped, data loss could occur.
+The column [track].[BatchLogEnd].[UpdateDateEnd] is being dropped, data loss could occur.
+The column [track].[BatchLogEnd].[UpdateBeg] on table [track].[BatchLogEnd] must be added, but the column has no default value and does not allow NULL values. If the table contains data, the ALTER script will not work. To avoid this issue you must either: add a default value to the column, mark it as allowing NULL values, or enable the generation of smart-defaults as a deployment option.
+The column [track].[ProcedureLogBegin].[ObjectId] is being dropped, data loss could occur.
+The column [track].[ProcedureLogBegin].[SchemaId] is being dropped, data loss could occur.
+The column [track].[ProcedureLogBegin].[txInsertedApp] is being dropped, data loss could occur.
+The column [track].[ProcedureLogBegin].[object_id] on table [track].[ProcedureLogBegin] must be added, but the column has no default value and does not allow NULL values. If the table contains data, the ALTER script will not work. To avoid this issue you must either: add a default value to the column, mark it as allowing NULL values, or enable the generation of smart-defaults as a deployment option.
+The column [track].[ProcedureLogBegin].[schema_id] on table [track].[ProcedureLogBegin] must be added, but the column has no default value and does not allow NULL values. If the table contains data, the ALTER script will not work. To avoid this issue you must either: add a default value to the column, mark it as allowing NULL values, or enable the generation of smart-defaults as a deployment option.
+The column [track].[ProcedureLogOrphans].[txInsertedApp] is being dropped, data loss could occur.
+If this deployment is executed, changes to [track].[ApplicationLogBegin] might introduce run-time errors in [track].[InsertApplicationLogBegin].
+If this deployment is executed, changes to [track].[ApplicationLogBegin] might introduce run-time errors in [track].[InsertApplicationLogOrphan].
+If this deployment is executed, changes to [track].[ApplicationLogOrphans] might introduce run-time errors in [track].[InsertApplicationLogOrphan].
+If this deployment is executed, changes to [track].[BatchLogBegin] might introduce run-time errors in [stg].[ReturnDrillingInfoDealsForSale_LastApiUpdate].
+If this deployment is executed, changes to [track].[BatchLogBegin] might introduce run-time errors in [stg].[ReturnDrillingInfoLeasesLandtrac_LastApiUpdate].
+If this deployment is executed, changes to [track].[BatchLogBegin] might introduce run-time errors in [stg].[ReturnDrillingInfoLeasesLegal_LastApiUpdate].
+If this deployment is executed, changes to [track].[BatchLogBegin] might introduce run-time errors in [stg].[ReturnDrillingInfoPermits_LastApiUpdate].
+If this deployment is executed, changes to [track].[BatchLogBegin] might introduce run-time errors in [stg].[ReturnDrillingInfoRigs_LastApiUpdate].
+If this deployment is executed, changes to [track].[BatchLogBegin] might introduce run-time errors in [stg].[ReturnDrillingInfoWells_LastApiUpdate].
+If this deployment is executed, changes to [track].[BatchLogBegin] might introduce run-time errors in [track].[InsertBatchLogBegin].
+If this deployment is executed, changes to [track].[BatchLogEnd] might introduce run-time errors in [stg].[InsertBatchLogEnd_DrillingInfoDealsForSale].
+If this deployment is executed, changes to [track].[BatchLogEnd] might introduce run-time errors in [stg].[InsertBatchLogEnd_DrillingInfoLeasesLandtrac].
+If this deployment is executed, changes to [track].[BatchLogEnd] might introduce run-time errors in [stg].[InsertBatchLogEnd_DrillingInfoLeasesLegal].
+If this deployment is executed, changes to [track].[BatchLogEnd] might introduce run-time errors in [stg].[InsertBatchLogEnd_DrillingInfoPermits].
+If this deployment is executed, changes to [track].[BatchLogEnd] might introduce run-time errors in [stg].[InsertBatchLogEnd_DrillingInfoRigs].
+If this deployment is executed, changes to [track].[BatchLogEnd] might introduce run-time errors in [stg].[InsertBatchLogEnd_DrillingInfoWells].
+If this deployment is executed, changes to [track].[BatchLogEnd] might introduce run-time errors in [stg].[ReturnDrillingInfoDealsForSale_LastApiUpdate].
+If this deployment is executed, changes to [track].[BatchLogEnd] might introduce run-time errors in [stg].[ReturnDrillingInfoLeasesLandtrac_LastApiUpdate].
+If this deployment is executed, changes to [track].[BatchLogEnd] might introduce run-time errors in [stg].[ReturnDrillingInfoLeasesLegal_LastApiUpdate].
+If this deployment is executed, changes to [track].[BatchLogEnd] might introduce run-time errors in [stg].[ReturnDrillingInfoPermits_LastApiUpdate].
+If this deployment is executed, changes to [track].[BatchLogEnd] might introduce run-time errors in [stg].[ReturnDrillingInfoRigs_LastApiUpdate].
+If this deployment is executed, changes to [track].[BatchLogEnd] might introduce run-time errors in [stg].[ReturnDrillingInfoWells_LastApiUpdate].
+If this deployment is executed, changes to [track].[BatchLogEnd] might introduce run-time errors in [track].[InsertBatchLogEnd].
+If this deployment is executed, changes to [track].[ProcedureLogBegin] might introduce run-time errors in [track].[InsertProcedureLogBegin].
+If this deployment is executed, changes to [track].[ProcedureLogBegin] might introduce run-time errors in [track].[InsertProcedureLogOrphan].
+If this deployment is executed, changes to [track].[ProcedureLogIntermediate] might introduce run-time errors in [track].[InsertProcedureLogIntermediate].
+If this deployment is executed, changes to [track].[ProcedureLogOrphans] might introduce run-time errors in [track].[InsertProcedureLogOrphan].
+If this deployment is executed, changes to [track].[ProcedureLog] might introduce run-time errors in [track].[ProcedureLogAll].
+
